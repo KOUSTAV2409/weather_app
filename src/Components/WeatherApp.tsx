@@ -34,9 +34,6 @@ const Weather = () => {
       const data = await response.json();
       const today = data.days[0];
 
-
-
-      //   "This WeatherData interface defines the structure of the weather information we expect from the API — like the address, timezone, temperature, weather conditions, and humidity. It ensures that our app knows exactly what data is coming and prevents errors."
       setWeatherData({
         resolvedAddress: data.resolvedAddress,
         timezone: data.timezone,
@@ -68,10 +65,6 @@ const Weather = () => {
     setCity(target.city.value);
   };
 
-  const handleUnitToggle = () => {
-    setUnit(prev => (prev === "us" ? "metric" : "us"));
-  };
-
   const handleLocationFetch = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -82,7 +75,7 @@ const Weather = () => {
         },
         (error) => {
           setError("Failed to get location. Please allow location access.");
-          console.log(error)
+          console.log(error);
         }
       );
     } else {
@@ -134,13 +127,6 @@ const Weather = () => {
         >
           Use My Location 📍
         </button>
-        <button
-          type="button"
-          onClick={handleUnitToggle}
-          className="p-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
-        >
-          Toggle °C / °F
-        </button>
       </form>
 
       {/* Error Message */}
@@ -191,13 +177,13 @@ const Weather = () => {
             <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
               <p className="text-xl font-semibold text-gray-800">Temperature:</p>
               <p className="text-lg text-gray-700">
-                {weatherData.temperature}°{unit === "us" ? "F" : "C"}
+                {Math.round((weatherData.temperature - 32) * (5 / 9))}°C
               </p>
             </div>
             <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
               <p className="text-xl font-semibold text-gray-800">Feels Like:</p>
               <p className="text-lg text-gray-700">
-                {weatherData.feelsLike}°{unit === "us" ? "F" : "C"}
+                {Math.round((weatherData.feelsLike - 32) * (5 / 9))}°C
               </p>
             </div>
             <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
