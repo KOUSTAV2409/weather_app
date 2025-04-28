@@ -50,6 +50,7 @@ const Weather = () => {
       });
     } catch (error: any) {
       setError(error.message);
+      console.log(error)
     } finally {
       setLoading(false);
     }
