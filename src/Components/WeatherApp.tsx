@@ -198,7 +198,7 @@ const Weather = () => {
             </div>
 
             {/* Description */}
-            <p className="text-center text-gray-700 dark:text-gray-300 text-2xl font-semibold">
+            <p className="text-center text-gray-700 dark:text-gray-300  font-semibold">
               {weatherData.weatherDescription}
             </p>
           </div>
