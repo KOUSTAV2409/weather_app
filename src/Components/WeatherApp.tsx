@@ -17,7 +17,6 @@ const Weather = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [unit, setUnit] = useState<"us" | "metric">("us");
 
   const apiKey = "4JJZTU8SPZXDWCNT65LW2JATF";
 
@@ -25,7 +24,7 @@ const Weather = () => {
     setLoading(true);
     setError(null);
 
-    const apiURL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${cityName}?unitGroup=${unit}&key=${apiKey}&contentType=json`;
+    const apiURL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${cityName}?unitGroup=us&key=${apiKey}&contentType=json`;
 
     try {
       const response = await fetch(apiURL);
@@ -86,7 +85,7 @@ const Weather = () => {
   useEffect(() => {
     fetchWeather(city);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [city, unit]);
+  }, [city]);
 
   const mapConditionToIcon = (condition: string) => {
     const lower = condition.toLowerCase();
