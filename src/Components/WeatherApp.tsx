@@ -36,7 +36,7 @@ const Weather = () => {
 
 
 
-    //   "This WeatherData interface defines the structure of the weather information we expect from the API — like the address, timezone, temperature, weather conditions, and humidity. It ensures that our app knows exactly what data is coming and prevents errors."
+      //   "This WeatherData interface defines the structure of the weather information we expect from the API — like the address, timezone, temperature, weather conditions, and humidity. It ensures that our app knows exactly what data is coming and prevents errors."
       setWeatherData({
         resolvedAddress: data.resolvedAddress,
         timezone: data.timezone,
@@ -48,9 +48,13 @@ const Weather = () => {
         humidity: today.humidity,
         icon: mapConditionToIcon(today.conditions),
       });
-    } catch (error: any) {
-      setError(error.message);
-      console.log(error)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
+      console.log(err);
     } finally {
       setLoading(false);
     }
