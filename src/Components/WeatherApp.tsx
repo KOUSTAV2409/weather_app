@@ -82,6 +82,7 @@ const Weather = () => {
         },
         (error) => {
           setError("Failed to get location. Please allow location access.");
+          console.log(error)
         }
       );
     } else {
