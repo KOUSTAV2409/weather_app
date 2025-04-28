@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapPin } from "lucide-react";
 
 interface WeatherData {
   resolvedAddress: string;
@@ -12,27 +13,35 @@ interface WeatherData {
   icon: string;
 }
 
+// Helpers
+const formatDate = (d: string) => {
+  const [y, m, day] = d.split("-");
+  return `${day}-${m}-${y}`;
+};
+const getWeekday = (d: string) => {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(y, m - 1, day).toLocaleDateString("en-US", { weekday: "long" });
+};
+
 const Weather = () => {
   const [city, setCity] = useState("baikola");
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
 
   const apiKey = "4JJZTU8SPZXDWCNT65LW2JATF";
 
   const fetchWeather = async (cityName: string) => {
     setLoading(true);
     setError(null);
-
-    const apiURL = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${cityName}?unitGroup=us&key=${apiKey}&contentType=json`;
-
     try {
-      const response = await fetch(apiURL);
-      if (!response.ok) throw new Error("City not found");
-
-      const data = await response.json();
+      const resp = await fetch(
+        `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${cityName}?unitGroup=us&key=${apiKey}&contentType=json`
+      );
+      if (!resp.ok) throw new Error("City not found");
+      const data = await resp.json();
       const today = data.days[0];
-
       setWeatherData({
         resolvedAddress: data.resolvedAddress,
         timezone: data.timezone,
@@ -45,163 +54,156 @@ const Weather = () => {
         icon: mapConditionToIcon(today.conditions),
       });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
-      }
-      console.log(err);
+      setError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const target = event.target as typeof event.target & {
-      city: { value: string };
-    };
-    setCity(target.city.value);
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const target = e.currentTarget.elements as any;
+    setCity(target.city.value.trim());
   };
 
   const handleLocationFetch = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          const coordinates = `${latitude},${longitude}`;
-          fetchWeather(coordinates);
-        },
-        (error) => {
-          setError("Failed to get location. Please allow location access.");
-          console.log(error);
-        }
-      );
-    } else {
-      setError("Geolocation is not supported by this browser.");
+    if (!navigator.geolocation) {
+      setError("Geolocation not supported");
+      return;
     }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => fetchWeather(`${coords.latitude},${coords.longitude}`),
+      () => setError("Please allow location access")
+    );
   };
 
   useEffect(() => {
     fetchWeather(city);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [city]);
 
-  const mapConditionToIcon = (condition: string) => {
-    const lower = condition.toLowerCase();
-    if (lower.includes("cloud")) return "☁️";
-    if (lower.includes("rain")) return "🌧️";
-    if (lower.includes("clear")) return "☀️";
-    if (lower.includes("snow")) return "❄️";
-    if (lower.includes("storm")) return "⛈️";
-    if (lower.includes("fog")) return "🌫️";
+  const mapConditionToIcon = (cond: string) => {
+    const c = cond.toLowerCase();
+    if (c.includes("cloud")) return "☁️";
+    if (c.includes("rain")) return "🌧️";
+    if (c.includes("clear")) return "☀️";
+    if (c.includes("snow")) return "❄️";
+    if (c.includes("storm")) return "⛈️";
+    if (c.includes("fog")) return "🌫️";
     return "🌡️";
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-50 to-gray-200 flex flex-col items-center justify-center p-8">
-      <h2 className="text-center bg-gradient-to-r from-blue-800 to-blue-600 text-white text-5xl font-extrabold p-6 rounded-lg shadow-xl w-full max-w-4xl mb-12">
-        Professional Weather Forecast App
-      </h2>
-
-      {/* Search & Buttons */}
-      <form onSubmit={handleSearch} className="flex gap-4 flex-wrap mb-8 justify-center">
-        <input
-          type="text"
-          name="city"
-          className="p-3 rounded-xl border-2 border-gray-300 focus:border-blue-500 focus:outline-none w-60"
-          placeholder="Enter city name"
-          defaultValue={city}
-        />
+    <div className={darkMode ? "dark" : ""}>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-black flex flex-col items-center justify-center p-8 transition-colors">
+        {/* Dark Mode Toggle */}
         <button
-          type="submit"
-          className="p-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition"
+          onClick={() => setDarkMode((d) => !d)}
+          className="absolute top-4 right-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
         >
-          Search
+          {darkMode ? "☀️" : "🌙"}
         </button>
-        <button
-          type="button"
-          onClick={handleLocationFetch}
-          className="p-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition"
+
+        {/* Search + Location Bar */}
+        <form
+          onSubmit={handleSearch}
+          className="flex w-full max-w-md mx-auto mb-8"
         >
-          Use My Location 📍
-        </button>
-      </form>
+          <input
+            name="city"
+            defaultValue={city}
+            placeholder="Enter city"
+            className="flex-1 p-3 rounded-l-xl border-2 border-r-0 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-gray-100 focus:border-blue-500 outline-none transition-colors"
+          />
+          <button className="p-3 bg-blue-600 text-white hover:bg-blue-700 transition">
+            Search
+          </button>
+          <button
+            type="button"
+            onClick={handleLocationFetch}
+            className="p-3 bg-green-600 text-white rounded-r-xl hover:bg-green-700 transition ml-2"
+          >
+            <MapPin size={20} />
+          </button>
+        </form>
 
-      {/* Error Message */}
-      {error && (
-        <div className="text-red-500 text-xl mb-8">
-          <p>{error}</p>
-        </div>
-      )}
+        {/* Error / Loading */}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {loading && <div className="text-gray-600 dark:text-gray-300 mb-4">Loading…</div>}
 
-      {/* Loading State */}
-      {loading ? (
-        <p className="text-center text-2xl font-semibold text-gray-600 mt-12">
-          Loading...
-        </p>
-      ) : weatherData ? (
-        <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl mx-auto transition-all transform hover:scale-105">
-          {/* Weather Icon */}
-          <div className="flex justify-center text-6xl mb-6">
-            {weatherData.icon}
-          </div>
+        {/* Main Card */}
+        {weatherData && (
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 max-w-4xl w-full drop-shadow-lg hover:drop-shadow-2xl transition-shadow duration-300">
 
-          {/* Main Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors">
-              <p className="text-xl font-semibold text-gray-800">Full Address:</p>
-              <p className="text-lg text-gray-700">{weatherData.resolvedAddress}</p>
-            </div>
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors">
-              <p className="text-xl font-semibold text-gray-800">Timezone:</p>
-              <p className="text-lg text-gray-700">{weatherData.timezone}</p>
-            </div>
-          </div>
-
-          {/* Weather Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors">
-              <p className="text-xl font-semibold text-gray-800">Date:</p>
-              <p className="text-lg text-gray-700">{weatherData.date}</p>
-            </div>
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors">
-              <p className="text-xl font-semibold text-gray-800">Weather Condition:</p>
-              <p className="text-lg text-gray-700">{weatherData.weatherCondition}</p>
-            </div>
-          </div>
-
-          {/* Extended Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
-              <p className="text-xl font-semibold text-gray-800">Temperature:</p>
-              <p className="text-lg text-gray-700">
-                {Math.round((weatherData.temperature - 32) * (5 / 9))}°C
+            {/* Icon & Temp */}
+            <div className="flex flex-col items-center mb-8">
+              <div className="flex items-center space-x-4">
+                <span className="text-8xl">{weatherData.icon}</span>
+                <span className="text-7xl font-semibold text-gray-900 dark:text-gray-100">
+                  {Math.round((weatherData.temperature - 32) * 5/9)}°C
+                </span>
+              </div>
+              <p className="mt-2 text-2xl capitalize text-gray-700 dark:text-gray-300">
+                {weatherData.weatherCondition.toLowerCase()}
               </p>
             </div>
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
-              <p className="text-xl font-semibold text-gray-800">Feels Like:</p>
-              <p className="text-lg text-gray-700">
-                {Math.round((weatherData.feelsLike - 32) * (5 / 9))}°C
-              </p>
-            </div>
-            <div className="flex flex-col bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors text-center">
-              <p className="text-xl font-semibold text-gray-800">Humidity:</p>
-              <p className="text-lg text-gray-700">{weatherData.humidity}%</p>
-            </div>
-          </div>
 
-          {/* Weather Description */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-md hover:bg-gray-200 transition-colors">
-            <p className="text-xl font-semibold text-gray-800">Weather Description:</p>
-            <p className="text-lg text-gray-700">{weatherData.weatherDescription}</p>
+            {/* Full Address & Timezone */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="bg-blue-50 dark:bg-gray-700 rounded-xl p-4 text-center transition-colors">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Address</p>
+                <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {weatherData.resolvedAddress}
+                </p>
+              </div>
+              <div className="bg-blue-50 dark:bg-gray-700 rounded-xl p-4 text-center transition-colors">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Timezone</p>
+                <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                  {weatherData.timezone}
+                </p>
+              </div>
+            </div>
+
+            {/* Date & Day */}
+            <div className="flex justify-between mb-6 space-x-4">
+              {[
+                ["Date", formatDate(weatherData.date)],
+                ["Day", getWeekday(weatherData.date)],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="flex-1 bg-blue-50 dark:bg-gray-700 rounded-xl p-4 text-center transition-colors"
+                >
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+                  <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Pills */}
+            <div className="flex justify-center space-x-4 mb-6">
+              {[
+                ["Feels Like", `${Math.round((weatherData.feelsLike - 32) * 5/9)}°C`],
+                ["Humidity", `${weatherData.humidity}%`],
+                ["Timezone", weatherData.timezone],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="bg-blue-100 dark:bg-gray-600 text-blue-800 dark:text-gray-200 rounded-full px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  {label}: {value}
+                </div>
+              ))}
+            </div>
+
+            {/* Description */}
+            <p className="text-center text-gray-700 dark:text-gray-300 text-2xl font-semibold">
+              {weatherData.weatherDescription}
+            </p>
           </div>
-        </div>
-      ) : (
-        <p className="text-center text-xl font-semibold text-gray-600 mt-12">
-          Enter a city to get the weather information
-        </p>
-      )}
+        )}
+      </div>
     </div>
   );
 };
