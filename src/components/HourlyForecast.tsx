@@ -7,19 +7,19 @@ interface Props {
 }
 
 const HourlyForecast = ({ hourly, unit }: Props) => (
-  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 max-w-4xl w-full shadow-xl">
-    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-      24-Hour Forecast
+  <div className="vercel-card rounded-2xl p-6 fade-in">
+    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-6 tracking-tight">
+      Next 24 Hours
     </h3>
-    <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-thin">
+    <div className="flex overflow-x-auto space-x-6 pb-2 scrollbar-thin">
       {hourly.map((hour, i) => (
         <div
           key={i}
-          className="flex-shrink-0 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 text-center min-w-[80px] hover:scale-105 transition-transform"
+          className="flex-shrink-0 text-center min-w-[60px] group"
         >
-          <p className="text-sm text-gray-600 dark:text-gray-400">{hour.time}</p>
-          <span className="text-3xl my-2 block">{hour.icon}</span>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{hour.time}</p>
+          <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform">{hour.icon}</span>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
             {convertTemp(hour.temp, unit)}°
           </p>
         </div>

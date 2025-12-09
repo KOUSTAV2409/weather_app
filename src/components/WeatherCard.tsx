@@ -1,5 +1,5 @@
 import { WeatherData, TemperatureUnit } from '../types/weather';
-import { convertTemp, formatDate, getWeekday, getWindDirection } from '../utils/helpers';
+import { convertTemp, formatDate, getWeekday } from '../utils/helpers';
 import { Star } from 'lucide-react';
 
 interface Props {
@@ -10,63 +10,68 @@ interface Props {
 }
 
 const WeatherCard = ({ data, unit, isFavorite, onToggleFavorite }: Props) => (
-  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 max-w-4xl w-full shadow-2xl hover:shadow-3xl transition-all duration-300">
-    <div className="flex justify-between items-start mb-6">
+  <div className="vercel-card rounded-2xl p-8 fade-in">
+    <div className="flex justify-between items-start mb-12">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 className="text-2xl font-medium tracking-tight text-gray-900 dark:text-white mb-1">
           {data.resolvedAddress}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">{data.timezone}</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(data.date)} · {getWeekday(data.date)}</p>
       </div>
       <button
         onClick={onToggleFavorite}
-        className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
       >
         <Star
-          size={24}
-          className={isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}
+          size={20}
+          className={isFavorite ? 'fill-black dark:fill-white text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}
         />
       </button>
     </div>
 
-    <div className="flex flex-col items-center mb-8">
-      <div className="flex items-center space-x-4">
-        <span className="text-8xl">{data.icon}</span>
-        <span className="text-7xl font-semibold text-gray-900 dark:text-gray-100">
-          {convertTemp(data.temperature, unit)}°{unit}
-        </span>
-      </div>
-      <p className="mt-2 text-2xl capitalize text-gray-700 dark:text-gray-300">
-        {data.weatherCondition.toLowerCase()}
-      </p>
-      <p className="text-gray-600 dark:text-gray-400 mt-1">{data.weatherDescription}</p>
+    <div className="flex items-end mb-12">
+      <span className="text-8xl font-light tracking-tighter text-gray-900 dark:text-white">
+        {convertTemp(data.temperature, unit)}°
+      </span>
+      <span className="text-3xl font-light text-gray-500 dark:text-gray-400 mb-3 ml-2">{unit}</span>
+      <span className="text-6xl ml-8 mb-2">{data.icon}</span>
     </div>
 
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="mb-8">
+      <p className="text-lg font-medium text-gray-900 dark:text-white mb-1 capitalize">
+        {data.weatherCondition.toLowerCase()}
+      </p>
+      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+        {data.weatherDescription}
+      </p>
+    </div>
+
+    <div className="grid grid-cols-4 gap-4 mb-6">
       {[
-        ['Feels Like', `${convertTemp(data.feelsLike, unit)}°${unit}`],
+        ['Feels Like', `${convertTemp(data.feelsLike, unit)}°`],
         ['Humidity', `${data.humidity}%`],
-        ['Wind', `${Math.round(data.windSpeed)} mph ${getWindDirection(data.windDirection)}`],
-        ['Pressure', `${Math.round(data.pressure)} mb`],
-        ['Visibility', `${Math.round(data.visibility)} mi`],
+        ['Wind', `${Math.round(data.windSpeed)} mph`],
         ['UV Index', data.uvIndex.toString()],
-        ['Sunrise', data.sunrise],
-        ['Sunset', data.sunset],
       ].map(([label, value]) => (
-        <div
-          key={label}
-          className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-4 text-center transition-all hover:scale-105"
-        >
-          <p className="text-xs text-gray-600 dark:text-gray-400">{label}</p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{value}</p>
+        <div key={label} className="border-l border-gray-300 dark:border-gray-700 pl-4">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</p>
+          <p className="text-lg font-medium text-gray-900 dark:text-white">{value}</p>
         </div>
       ))}
     </div>
 
-    <div className="flex justify-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-      <span>{formatDate(data.date)}</span>
-      <span>•</span>
-      <span>{getWeekday(data.date)}</span>
+    <div className="grid grid-cols-4 gap-4 pt-6 border-t border-gray-300 dark:border-gray-700">
+      {[
+        ['Pressure', `${Math.round(data.pressure)} mb`],
+        ['Visibility', `${Math.round(data.visibility)} mi`],
+        ['Sunrise', data.sunrise],
+        ['Sunset', data.sunset],
+      ].map(([label, value]) => (
+        <div key={label}>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{value}</p>
+        </div>
+      ))}
     </div>
   </div>
 );

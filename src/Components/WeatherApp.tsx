@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { WeatherData, HourlyWeather, DailyForecast as DailyForecastType, TemperatureUnit } from '../types/weather';
 import { fetchWeatherData, parseCurrentWeather, parseHourlyForecast, parseDailyForecast } from '../services/weatherService';
-import { getWeatherBackground } from '../utils/helpers';
 import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit } from '../utils/storage';
 import WeatherCard from '../components/WeatherCard';
 import HourlyForecast from '../components/HourlyForecast';
@@ -17,7 +16,7 @@ const WeatherApp = () => {
   const [dailyData, setDailyData] = useState<DailyForecastType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [unit, setUnit] = useState<TemperatureUnit>(getTemperatureUnit());
   const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -79,36 +78,32 @@ const WeatherApp = () => {
     fetchWeather(city);
   }, []);
 
-  const bgGradient = weatherData 
-    ? getWeatherBackground(weatherData.weatherCondition)
-    : 'from-blue-50 to-white';
-
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className={`min-h-screen bg-gradient-to-b ${bgGradient} dark:from-gray-900 dark:to-black transition-all duration-500 p-4 md:p-8`}>
-        <div className="max-w-6xl mx-auto">
-          {/* Header Controls */}
+      <div className="min-h-screen bg-black transition-colors p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              Weather App
+            <h1 className="text-2xl font-medium tracking-tight text-white">
+              Weather
             </h1>
             <div className="flex gap-2">
               <button
                 onClick={toggleUnit}
-                className="px-4 py-2 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 font-semibold hover:scale-105 transition"
+                className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white"
               >
                 °{unit}
               </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:scale-105 transition"
+                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
               >
-                {darkMode ? <Sun className="text-yellow-400" size={20} /> : <Moon className="text-gray-700" size={20} />}
+                {darkMode ? <Sun size={18} className="text-white" /> : <Moon size={18} className="text-gray-900" />}
               </button>
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Search */}
           <div className="mb-8">
             <SearchBar
               defaultValue={city}
@@ -120,19 +115,19 @@ const WeatherApp = () => {
             />
           </div>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
-            <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl mb-6">
-              {error}
+            <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 mb-6">
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
-          {/* Loading State */}
+          {/* Loading */}
           {loading && <LoadingSkeleton />}
 
-          {/* Weather Content */}
+          {/* Content */}
           {!loading && weatherData && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <WeatherCard
                 data={weatherData}
                 unit={unit}

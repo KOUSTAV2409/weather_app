@@ -1,8 +1,34 @@
 @import "tailwindcss";
 
-/* Custom Scrollbar */
+/* Vercel-inspired Design System with Better Contrast */
+:root {
+  --geist-foreground: #000;
+  --geist-background: #fff;
+  --accents-1: #fafafa;
+  --accents-2: #e5e5e5;
+  --accents-3: #666;
+  --accents-4: #888;
+  --accents-5: #999;
+  --accents-8: #111;
+  --shadow-small: 0 5px 10px rgba(0,0,0,.12);
+  --shadow-medium: 0 8px 30px rgba(0,0,0,.12);
+  --shadow-large: 0 30px 60px rgba(0,0,0,.12);
+}
+
+.dark {
+  --geist-foreground: #fff;
+  --geist-background: #000;
+  --accents-1: #111;
+  --accents-2: #333;
+  --accents-3: #888;
+  --accents-4: #999;
+  --accents-5: #aaa;
+  --accents-8: #fafafa;
+}
+
+/* Refined Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
-  height: 6px;
+  height: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -10,17 +36,75 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: var(--accents-3);
+  border-radius: 2px;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #475569;
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--accents-4);
 }
 
-/* Smooth transitions */
+/* Smooth Transitions */
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
+  transition-property: background-color, border-color, color, fill, stroke, opacity, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 200ms;
+}
+
+/* Vercel Card Effect */
+.vercel-card {
+  background: var(--geist-background);
+  border: 1px solid var(--accents-2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vercel-card:hover {
+  border-color: var(--accents-3);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+/* Subtle Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--accents-1) 0%,
+    var(--accents-2) 50%,
+    var(--accents-1) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Geist Font Styling */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
