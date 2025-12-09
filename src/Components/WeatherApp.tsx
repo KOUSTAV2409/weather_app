@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Moon, Sun, GitCompare } from 'lucide-react';
+import { Moon, Sun, GitCompare, Github } from 'lucide-react';
 import { WeatherData, HourlyWeather, DailyForecast as DailyForecastType, TemperatureUnit } from '../types/weather';
 import { fetchWeatherData, parseCurrentWeather, parseHourlyForecast, parseDailyForecast } from '../services/weatherService';
 import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit } from '../utils/storage';
@@ -95,6 +95,15 @@ const WeatherApp = () => {
               Weather
             </h1>
             <div className="flex gap-2">
+              <a
+                href="https://github.com/KOUSTAV2409/weather_app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
+                title="View on GitHub"
+              >
+                <Github size={18} className="text-white" />
+              </a>
               <button
                 onClick={() => setShowComparison(true)}
                 className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white flex items-center gap-2"

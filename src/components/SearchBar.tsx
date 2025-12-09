@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Search, Clock, Star } from 'lucide-react';
+import { MapPin, Search, Clock, Star, Globe } from 'lucide-react';
 import { getSearchHistory, getFavorites } from '../utils/storage';
 import { debounce } from '../utils/helpers';
 
@@ -9,16 +9,35 @@ interface Props {
   defaultValue: string;
 }
 
+// Popular cities for quick suggestions
+const POPULAR_CITIES = [
+  'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
+  'London', 'Paris', 'Tokyo', 'Sydney', 'Mumbai',
+  'Dubai', 'Singapore', 'Toronto', 'Berlin', 'Madrid'
+];
+
 const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
   const [input, setInput] = useState(defaultValue);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [filteredCities, setFilteredCities] = useState<string[]>([]);
 
   useEffect(() => {
     setHistory(getSearchHistory());
     setFavorites(getFavorites().map(f => f.name));
   }, []);
+
+  useEffect(() => {
+    if (input.trim().length >= 2) {
+      const filtered = POPULAR_CITIES.filter(city =>
+        city.toLowerCase().includes(input.toLowerCase())
+      ).slice(0, 5);
+      setFilteredCities(filtered);
+    } else {
+      setFilteredCities([]);
+    }
+  }, [input]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,10 +80,27 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
         </button>
       </form>
 
-      {showSuggestions && (favorites.length > 0 || history.length > 0) && (
+      {showSuggestions && (favorites.length > 0 || history.length > 0 || filteredCities.length > 0) && (
         <div className="absolute top-full mt-2 w-full vercel-card rounded-xl shadow-lg max-h-64 overflow-y-auto z-50">
-          {favorites.length > 0 && (
+          {filteredCities.length > 0 && (
             <div className="p-2">
+              <p className="text-xs text-gray-600 dark:text-gray-400 px-3 py-2 font-medium">
+                Suggestions
+              </p>
+              {filteredCities.map((city, i) => (
+                <button
+                  key={i}
+                  onClick={() => selectSuggestion(city)}
+                  className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors text-left"
+                >
+                  <Globe size={14} className="text-blue-500" />
+                  <span className="text-sm text-gray-900 dark:text-white">{city}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {favorites.length > 0 && (
+            <div className="p-2 border-t border-gray-200 dark:border-gray-800">
               <p className="text-xs text-gray-600 dark:text-gray-400 px-3 py-2 font-medium">
                 Favorites
               </p>
