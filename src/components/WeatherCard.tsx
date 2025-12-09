@@ -1,5 +1,6 @@
 import { WeatherData, TemperatureUnit } from '../types/weather';
-import { convertTemp, formatDate, getWeekday } from '../utils/helpers';
+import { convertTemp, formatDate, getWeekday, getWeatherIconClass } from '../utils/helpers';
+import { getActivitySuggestion } from '../utils/activitySuggestions';
 import { Star } from 'lucide-react';
 
 interface Props {
@@ -29,12 +30,19 @@ const WeatherCard = ({ data, unit, isFavorite, onToggleFavorite }: Props) => (
       </button>
     </div>
 
-    <div className="flex items-end mb-12">
+    <div className="flex items-end mb-6">
       <span className="text-8xl font-light tracking-tighter text-gray-900 dark:text-white">
         {convertTemp(data.temperature, unit)}°
       </span>
       <span className="text-3xl font-light text-gray-500 dark:text-gray-400 mb-3 ml-2">{unit}</span>
-      <span className="text-6xl ml-8 mb-2">{data.icon}</span>
+      <span className={`text-6xl ml-8 mb-2 ${getWeatherIconClass(data.weatherCondition)}`}>{data.icon}</span>
+    </div>
+
+    {/* Activity Suggestion */}
+    <div className="mb-8 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
+      <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+        {getActivitySuggestion(data)}
+      </p>
     </div>
 
     <div className="mb-8">
