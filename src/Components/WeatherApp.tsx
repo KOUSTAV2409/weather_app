@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, GitCompare } from 'lucide-react';
 import { WeatherData, HourlyWeather, DailyForecast as DailyForecastType, TemperatureUnit } from '../types/weather';
 import { fetchWeatherData, parseCurrentWeather, parseHourlyForecast, parseDailyForecast } from '../services/weatherService';
 import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit } from '../utils/storage';
@@ -8,6 +8,12 @@ import HourlyForecast from '../components/HourlyForecast';
 import DailyForecast from '../components/DailyForecast';
 import SearchBar from '../components/SearchBar';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import WeatherComparison from '../components/WeatherComparison';
+import WeatherStreaks from '../components/WeatherStreaks';
+import BestTimeOfDay from '../components/BestTimeOfDay';
+import OutfitSuggestions from '../components/OutfitSuggestions';
+import WeatherQuiz from '../components/WeatherQuiz';
+import WeatherSounds from '../components/WeatherSounds';
 
 const WeatherApp = () => {
   const [city, setCity] = useState('baikola');
@@ -19,6 +25,7 @@ const WeatherApp = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [unit, setUnit] = useState<TemperatureUnit>(getTemperatureUnit());
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     setFavorites(getFavorites().map(f => f.name));
@@ -89,6 +96,13 @@ const WeatherApp = () => {
             </h1>
             <div className="flex gap-2">
               <button
+                onClick={() => setShowComparison(true)}
+                className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white flex items-center gap-2"
+              >
+                <GitCompare size={16} />
+                Compare
+              </button>
+              <button
                 onClick={toggleUnit}
                 className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white"
               >
@@ -134,11 +148,30 @@ const WeatherApp = () => {
                 isFavorite={favorites.some(f => f.toLowerCase() === weatherData.resolvedAddress.toLowerCase())}
                 onToggleFavorite={toggleFavorite}
               />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <BestTimeOfDay hourly={hourlyData} unit={unit} />
+                <OutfitSuggestions data={weatherData} unit={unit} />
+              </div>
+
               <HourlyForecast hourly={hourlyData} unit={unit} />
               <DailyForecast forecast={dailyData} unit={unit} />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <WeatherStreaks forecast={dailyData} />
+                <WeatherQuiz forecast={dailyData} unit={unit} />
+              </div>
             </div>
           )}
         </div>
+
+        {/* Weather Sounds */}
+        {weatherData && <WeatherSounds condition={weatherData.weatherCondition} />}
+
+        {/* Comparison Modal */}
+        {showComparison && (
+          <WeatherComparison unit={unit} onClose={() => setShowComparison(false)} />
+        )}
       </div>
     </div>
   );

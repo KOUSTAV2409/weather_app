@@ -29,6 +29,16 @@ export const getWeatherBackground = (condition: string): string => {
   return 'from-blue-50 to-white';
 };
 
+export const getWeatherIconClass = (condition: string): string => {
+  const c = condition.toLowerCase();
+  if (c.includes('clear') || c.includes('sun')) return 'weather-icon sunny';
+  if (c.includes('cloud')) return 'weather-icon cloudy';
+  if (c.includes('rain')) return 'weather-icon rainy';
+  if (c.includes('snow')) return 'weather-icon snowy';
+  if (c.includes('storm')) return 'weather-icon stormy';
+  return 'weather-icon';
+};
+
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
