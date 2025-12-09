@@ -42,6 +42,8 @@ export const parseCurrentWeather = (data: any): WeatherData => {
   return {
     resolvedAddress: data.resolvedAddress,
     timezone: data.timezone,
+    latitude: data.latitude,
+    longitude: data.longitude,
     date: today.datetime,
     weatherCondition: today.conditions,
     weatherDescription: today.description,
