@@ -1,6 +1,8 @@
 export interface WeatherData {
   resolvedAddress: string;
   timezone: string;
+  latitude: number;
+  longitude: number;
   date: string;
   weatherCondition: string;
   weatherDescription: string;

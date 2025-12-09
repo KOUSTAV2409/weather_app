@@ -14,6 +14,7 @@ import BestTimeOfDay from '../components/BestTimeOfDay';
 import OutfitSuggestions from '../components/OutfitSuggestions';
 import WeatherQuiz from '../components/WeatherQuiz';
 import WeatherSounds from '../components/WeatherSounds';
+import WeatherMap from '../components/WeatherMap';
 
 const WeatherApp = () => {
   const [city, setCity] = useState('baikola');
@@ -156,6 +157,12 @@ const WeatherApp = () => {
                 unit={unit}
                 isFavorite={favorites.some(f => f.toLowerCase() === weatherData.resolvedAddress.toLowerCase())}
                 onToggleFavorite={toggleFavorite}
+              />
+              
+              <WeatherMap 
+                lat={weatherData.latitude} 
+                lon={weatherData.longitude} 
+                city={weatherData.resolvedAddress} 
               />
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

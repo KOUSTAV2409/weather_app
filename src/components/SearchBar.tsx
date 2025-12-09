@@ -81,7 +81,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
       </form>
 
       {showSuggestions && (favorites.length > 0 || history.length > 0 || filteredCities.length > 0) && (
-        <div className="absolute top-full mt-2 w-full vercel-card rounded-xl shadow-lg max-h-64 overflow-y-auto z-50">
+        <div className="absolute top-full mt-2 w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg max-h-64 overflow-y-auto z-50">
           {filteredCities.length > 0 && (
             <div className="p-2">
               <p className="text-xs text-gray-600 dark:text-gray-400 px-3 py-2 font-medium">
