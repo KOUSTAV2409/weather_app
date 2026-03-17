@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CloudRain,
@@ -10,9 +11,45 @@ import {
   Sparkles,
   MapPin,
   HelpCircle,
+  Search,
+  MapPin as MapIcon,
 } from 'lucide-react';
 
+const VideoPlaceholder = () => (
+  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent">
+    {/* Mock app preview */}
+    <div className="w-full max-w-[280px] space-y-4">
+      <div className="flex gap-2">
+        <div className="flex-1 h-11 rounded-xl border border-white/20 flex items-center gap-2 px-3">
+          <Search size={16} className="text-white/40" />
+          <span className="text-sm text-white/40">Search location...</span>
+        </div>
+        <div className="h-11 w-11 rounded-xl border border-white/20 flex items-center justify-center">
+          <MapIcon size={18} className="text-white/40" />
+        </div>
+      </div>
+      <div className="rounded-2xl border border-white/15 p-5 space-y-3">
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="h-4 w-24 bg-white/20 rounded mb-2" />
+            <div className="h-3 w-16 bg-white/10 rounded" />
+          </div>
+          <span className="text-4xl">☀️</span>
+        </div>
+        <div className="h-12 w-20 bg-white/25 rounded" />
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-8 bg-white/10 rounded" />
+          ))}
+        </div>
+      </div>
+    </div>
+    <p className="mt-6 text-xs text-white/40">Try the app to see it live</p>
+  </div>
+);
+
 const LandingPage = () => {
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const features = [
     {
       icon: Shirt,
@@ -127,15 +164,18 @@ const LandingPage = () => {
               </Link>
             </div>
 
-            {/* Right: Demo video */}
+            {/* Right: Demo video or placeholder */}
             <div className="mt-12 lg:mt-0 lg:flex-1 lg:min-w-0 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-gradient-to-br from-white/[0.05] to-transparent">
+              <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-gradient-to-br from-white/[0.05] to-transparent aspect-video min-h-[240px]">
+                {!videoLoaded && <VideoPlaceholder />}
                 <video
                   autoPlay
                   loop
                   muted
                   playsInline
-                  className="relative z-10 w-full aspect-video object-cover"
+                  onLoadedData={() => setVideoLoaded(true)}
+                  onError={() => setVideoLoaded(false)}
+                  className={`w-full aspect-video object-cover transition-opacity duration-500 ${videoLoaded ? 'opacity-100 relative z-10' : 'opacity-0 absolute'}`}
                 >
                   <source src="/demo.webm" type="video/webm" />
                   <source src="/demo.mp4" type="video/mp4" />
