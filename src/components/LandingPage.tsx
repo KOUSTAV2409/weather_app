@@ -76,15 +76,6 @@ const LandingPage = () => {
         }}
       />
 
-      {/* Decorative gradient orb - balances right side */}
-      <div
-        className="fixed top-1/2 -translate-y-1/2 right-0 w-[40vw] max-w-[500px] h-[60vh] opacity-20 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at center right, rgba(120, 180, 255, 0.15) 0%, transparent 70%)',
-        }}
-      />
-
       <div className="relative min-h-screen flex flex-col">
         {/* Header */}
         <header className="p-6 md:p-8 flex justify-between items-center">
@@ -108,30 +99,49 @@ const LandingPage = () => {
           </a>
         </header>
 
-        {/* Hero - centered with max-width for balance */}
+        {/* Hero - two column: content left, demo video right */}
         <main className="flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-24">
-          <div className="max-w-2xl mx-auto lg:mx-0">
-            <h1
-              className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-white mb-6"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-            >
-              Our Weather
-            </h1>
-            <p className="text-xl md:text-2xl text-white/70 leading-relaxed mb-12 max-w-lg">
-              Weather that tells you what to wear, when to run, and plays rain
-              sounds when it's raining.
-            </p>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 xl:gap-24">
+            {/* Left: Hero content */}
+            <div className="max-w-2xl mx-auto lg:mx-0 flex-shrink-0">
+              <h1
+                className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-white mb-6"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                Our Weather
+              </h1>
+              <p className="text-xl md:text-2xl text-white/70 leading-relaxed mb-12 max-w-lg">
+                Weather that tells you what to wear, when to run, and plays rain
+                sounds when it's raining.
+              </p>
 
-            <Link
-              to="/app"
-              className="inline-flex items-center gap-2 px-8 py-4 border border-white/30 rounded-lg text-white hover:bg-white hover:text-black transition-all duration-300 group"
-            >
-              <span>Try the app</span>
-              <ArrowRight
-                size={18}
-                className="group-hover:translate-x-1 transition-transform"
-              />
-            </Link>
+              <Link
+                to="/app"
+                className="inline-flex items-center gap-2 px-8 py-4 border border-white/30 rounded-lg text-white hover:bg-white hover:text-black transition-all duration-300 group"
+              >
+                <span>Try the app</span>
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </Link>
+            </div>
+
+            {/* Right: Demo video */}
+            <div className="mt-12 lg:mt-0 lg:flex-1 lg:min-w-0 flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-gradient-to-br from-white/[0.05] to-transparent">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="relative z-10 w-full aspect-video object-cover"
+                >
+                  <source src="/demo.webm" type="video/webm" />
+                  <source src="/demo.mp4" type="video/mp4" />
+                </video>
+              </div>
+            </div>
           </div>
 
           {/* Features - Grid with dividers */}
