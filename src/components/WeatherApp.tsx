@@ -2,28 +2,28 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun, GitCompare, Github } from 'lucide-react';
 import { WeatherData, HourlyWeather, DailyForecast as DailyForecastType, TemperatureUnit } from '../types/weather';
 import { fetchWeatherData, parseCurrentWeather, parseHourlyForecast, parseDailyForecast } from '../services/weatherService';
-import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit } from '../utils/storage';
-import WeatherCard from '../components/WeatherCard';
-import HourlyForecast from '../components/HourlyForecast';
-import DailyForecast from '../components/DailyForecast';
-import SearchBar from '../components/SearchBar';
-import LoadingSkeleton from '../components/LoadingSkeleton';
-import WeatherComparison from '../components/WeatherComparison';
-import WeatherStreaks from '../components/WeatherStreaks';
-import BestTimeOfDay from '../components/BestTimeOfDay';
-import OutfitSuggestions from '../components/OutfitSuggestions';
-import WeatherQuiz from '../components/WeatherQuiz';
-import WeatherSounds from '../components/WeatherSounds';
-import WeatherMap from '../components/WeatherMap';
+import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit, getDarkMode, setDarkMode } from '../utils/storage';
+import WeatherCard from './WeatherCard';
+import HourlyForecast from './HourlyForecast';
+import DailyForecast from './DailyForecast';
+import SearchBar from './SearchBar';
+import LoadingSkeleton from './LoadingSkeleton';
+import WeatherComparison from './WeatherComparison';
+import WeatherStreaks from './WeatherStreaks';
+import BestTimeOfDay from './BestTimeOfDay';
+import OutfitSuggestions from './OutfitSuggestions';
+import WeatherQuiz from './WeatherQuiz';
+import WeatherSounds from './WeatherSounds';
+import WeatherMap from './WeatherMap';
 
 const WeatherApp = () => {
-  const [city, setCity] = useState('baikola');
+  const [city, setCity] = useState('New York');
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [hourlyData, setHourlyData] = useState<HourlyWeather[]>([]);
   const [dailyData, setDailyData] = useState<DailyForecastType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkModeState] = useState(getDarkMode());
   const [unit, setUnit] = useState<TemperatureUnit>(getTemperatureUnit());
   const [favorites, setFavorites] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -82,6 +82,12 @@ const WeatherApp = () => {
     setTemperatureUnit(newUnit);
   };
 
+  const toggleDarkMode = () => {
+    const newValue = !darkMode;
+    setDarkModeState(newValue);
+    setDarkMode(newValue);
+  };
+
   useEffect(() => {
     fetchWeather(city);
   }, []);
@@ -119,7 +125,7 @@ const WeatherApp = () => {
                 °{unit}
               </button>
               <button
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={toggleDarkMode}
                 className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
               >
                 {darkMode ? <Sun size={18} className="text-white" /> : <Moon size={18} className="text-gray-900" />}
