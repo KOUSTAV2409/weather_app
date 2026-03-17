@@ -35,7 +35,7 @@ const WeatherApp = () => {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-medium tracking-tight text-white">
+            <h1 className="text-2xl md:text-3xl font-calligraphic text-white">
               Weather
             </h1>
             <div className="flex gap-2">
