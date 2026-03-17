@@ -1,5 +1,16 @@
 import { Link } from 'react-router-dom';
-import { CloudRain, Shirt, GitCompare, Github, ArrowRight } from 'lucide-react';
+import {
+  CloudRain,
+  Shirt,
+  GitCompare,
+  Github,
+  ArrowRight,
+  Clock,
+  TrendingUp,
+  Sparkles,
+  MapPin,
+  HelpCircle,
+} from 'lucide-react';
 
 const LandingPage = () => {
   const features = [
@@ -20,6 +31,36 @@ const LandingPage = () => {
       title: 'Compare cities',
       description:
         'Side-by-side comparison of up to 3 cities worldwide.',
+    },
+    {
+      icon: MapPin,
+      title: 'Interactive map',
+      description:
+        'See your location on the map with weather context.',
+    },
+    {
+      icon: Clock,
+      title: 'Best time of day',
+      description:
+        'Find the most comfortable hour to go outside today.',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Weather streaks',
+      description:
+        'Detect patterns like sunny or rainy streaks ahead.',
+    },
+    {
+      icon: Sparkles,
+      title: 'Activity suggestions',
+      description:
+        'Smart recommendations—perfect day for a run or a cozy stay-in.',
+    },
+    {
+      icon: HelpCircle,
+      title: 'Weather quiz',
+      description:
+        'Guess tomorrow\'s temperature and test your weather intuition.',
     },
   ];
 
@@ -93,22 +134,27 @@ const LandingPage = () => {
             </Link>
           </div>
 
-          {/* Features - Card grid */}
-          <div className="mt-24 md:mt-32 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="group p-6 md:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300"
-              >
-                <div className="w-14 h-14 rounded-xl border border-white/20 flex items-center justify-center mb-5 group-hover:border-white/40 transition-colors">
-                  <Icon size={28} className="text-white/80" />
+          {/* Features - Grid with dividers */}
+          <div className="mt-24 md:mt-32 mb-20 md:mb-28">
+            <h2 className="text-sm font-medium tracking-widest uppercase text-white/50 mb-8">
+              Features
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-l border-white/10">
+              {features.map(({ icon: Icon, title, description }) => (
+                <div
+                  key={title}
+                  className="group p-6 md:p-8 border-b border-r border-white/10 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-[inset_0_0_30px_rgba(255,255,255,0.03)]"
+                >
+                  <Icon size={20} className="text-white/60 mb-4" strokeWidth={1.5} />
+                  <h3 className="text-base font-semibold text-white mb-2 transition-transform duration-300 group-hover:translate-x-1">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    {description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-medium text-white mb-2">{title}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">
-                  {description}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </main>
 
