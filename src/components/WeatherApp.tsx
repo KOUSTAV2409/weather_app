@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Moon, Sun, GitCompare, Github } from 'lucide-react';
-import { WeatherData, HourlyWeather, DailyForecast as DailyForecastType, TemperatureUnit } from '../types/weather';
-import { fetchWeatherData, parseCurrentWeather, parseHourlyForecast, parseDailyForecast } from '../services/weatherService';
-import { addToHistory, getFavorites, addFavorite, removeFavorite, getTemperatureUnit, setTemperatureUnit, getDarkMode, setDarkMode } from '../utils/storage';
+import { useWeather, useGeolocation, useTheme, useFavorites } from '../hooks';
+import { useWeatherStore } from '../store/weatherStore';
 import WeatherCard from './WeatherCard';
 import HourlyForecast from './HourlyForecast';
 import DailyForecast from './DailyForecast';
@@ -15,82 +14,19 @@ import OutfitSuggestions from './OutfitSuggestions';
 import WeatherQuiz from './WeatherQuiz';
 import WeatherSounds from './WeatherSounds';
 import WeatherMap from './WeatherMap';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const WeatherApp = () => {
-  const [city, setCity] = useState('New York');
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [hourlyData, setHourlyData] = useState<HourlyWeather[]>([]);
-  const [dailyData, setDailyData] = useState<DailyForecastType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [darkMode, setDarkModeState] = useState(getDarkMode());
-  const [unit, setUnit] = useState<TemperatureUnit>(getTemperatureUnit());
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
 
-  useEffect(() => {
-    setFavorites(getFavorites().map(f => f.name));
-  }, []);
+  const { city, weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
+  const { getLocation, error: locationError, isLocating, clearError } = useGeolocation();
+  const { darkMode, toggleDarkMode } = useTheme();
+  const unit = useWeatherStore((s) => s.unit);
+  const toggleUnit = useWeatherStore((s) => s.toggleUnit);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  const fetchWeather = async (cityName: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchWeatherData(cityName);
-      setWeatherData(parseCurrentWeather(data));
-      setHourlyData(parseHourlyForecast(data));
-      setDailyData(parseDailyForecast(data));
-      addToHistory(cityName);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch weather');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLocationFetch = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation not supported');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const locationStr = `${coords.latitude},${coords.longitude}`;
-        setCity(locationStr);
-        fetchWeather(locationStr);
-      },
-      () => setError('Please allow location access')
-    );
-  };
-
-  const toggleFavorite = () => {
-    if (!weatherData) return;
-    const cityName = weatherData.resolvedAddress;
-    const isFav = favorites.some(f => f.toLowerCase() === cityName.toLowerCase());
-    
-    if (isFav) {
-      removeFavorite(cityName);
-    } else {
-      addFavorite(cityName);
-    }
-    setFavorites(getFavorites().map(f => f.name));
-  };
-
-  const toggleUnit = () => {
-    const newUnit = unit === 'C' ? 'F' : 'C';
-    setUnit(newUnit);
-    setTemperatureUnit(newUnit);
-  };
-
-  const toggleDarkMode = () => {
-    const newValue = !darkMode;
-    setDarkModeState(newValue);
-    setDarkMode(newValue);
-  };
-
-  useEffect(() => {
-    fetchWeather(city);
-  }, []);
+  const displayError = error ?? locationError;
 
   return (
     <div className={darkMode ? 'dark' : ''}>
@@ -138,53 +74,55 @@ const WeatherApp = () => {
             <SearchBar
               defaultValue={city}
               onSearch={(c) => {
-                setCity(c);
-                fetchWeather(c);
+                clearError();
+                search(c);
               }}
-              onLocationFetch={handleLocationFetch}
+              onLocationFetch={getLocation}
             />
           </div>
 
           {/* Error */}
-          {error && (
+          {displayError && (
             <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 mb-6">
-              <p className="text-sm text-red-400">{error}</p>
+              <p className="text-sm text-red-400">{displayError}</p>
             </div>
           )}
 
           {/* Loading */}
-          {loading && <LoadingSkeleton />}
+          {(loading || isLocating) && <LoadingSkeleton />}
 
           {/* Content */}
-          {!loading && weatherData && (
-            <div className="space-y-4">
-              <WeatherCard
-                data={weatherData}
-                unit={unit}
-                isFavorite={favorites.some(f => f.toLowerCase() === weatherData.resolvedAddress.toLowerCase())}
-                onToggleFavorite={toggleFavorite}
-              />
-              
-              <WeatherMap 
-                lat={weatherData.latitude} 
-                lon={weatherData.longitude} 
-                city={weatherData.resolvedAddress} 
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <BestTimeOfDay hourly={hourlyData} unit={unit} />
-                <OutfitSuggestions data={weatherData} unit={unit} />
-              </div>
+          <ErrorBoundary>
+            {!loading && !isLocating && weatherData && (
+              <div className="space-y-4">
+                <WeatherCard
+                  data={weatherData}
+                  unit={unit}
+                  isFavorite={isFavorite(weatherData.resolvedAddress)}
+                  onToggleFavorite={() => toggleFavorite(weatherData.resolvedAddress)}
+                />
 
-              <HourlyForecast hourly={hourlyData} unit={unit} />
-              <DailyForecast forecast={dailyData} unit={unit} />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <WeatherStreaks forecast={dailyData} />
-                <WeatherQuiz forecast={dailyData} unit={unit} />
+                <WeatherMap
+                  lat={weatherData.latitude}
+                  lon={weatherData.longitude}
+                  city={weatherData.resolvedAddress}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <BestTimeOfDay hourly={hourlyData} unit={unit} />
+                  <OutfitSuggestions data={weatherData} unit={unit} />
+                </div>
+
+                <HourlyForecast hourly={hourlyData} unit={unit} />
+                <DailyForecast forecast={dailyData} unit={unit} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <WeatherStreaks forecast={dailyData} />
+                  <WeatherQuiz forecast={dailyData} unit={unit} />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </ErrorBoundary>
         </div>
 
         {/* Weather Sounds */}

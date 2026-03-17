@@ -43,9 +43,9 @@ Initial city is `'baikola'` (likely meant “Baikul” or similar). Use a sensib
 
 ---
 
-## Architecture Improvements
+## Architecture Improvements ✅
 
-### 1. State Management
+### 1. State Management ✅
 All state lives in `WeatherApp.tsx` (~30 lines of state). As features grow, this will become hard to maintain.
 
 **Recommendation:** Introduce a small store (e.g. **Zustand**):
@@ -56,7 +56,7 @@ All state lives in `WeatherApp.tsx` (~30 lines of state). As features grow, this
 
 Benefits: less prop drilling, clearer separation of concerns, easier testing.
 
-### 2. Custom Hooks
+### 2. Custom Hooks ✅
 Extract logic into hooks:
 
 - `useWeather(city)` – fetch, cache, loading, error
@@ -64,10 +64,10 @@ Extract logic into hooks:
 - `useTheme()` – dark/light + persistence
 - `useFavorites()` – add/remove + persistence
 
-### 3. Error Boundaries
+### 3. Error Boundaries ✅
 Add an error boundary around the main content so a single component crash doesn’t break the whole app.
 
-### 4. API Layer
+### 4. API Layer ✅
 - Add retries (e.g. 2 retries with backoff)
 - Centralize error handling and user-facing messages
 - Consider React Query / TanStack Query for caching, refetching, and loading states
