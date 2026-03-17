@@ -3,8 +3,11 @@ import { WeatherData, HourlyWeather, DailyForecast } from '../types/weather';
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const BASE_URL = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline';
 
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1000;
 
 const mapConditionToIcon = (cond: string): string => {
   const c = cond.toLowerCase();
@@ -17,24 +20,49 @@ const mapConditionToIcon = (cond: string): string => {
   return '🌡️';
 };
 
-export const fetchWeatherData = async (cityName: string) => {
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getUserFacingError = (status: number, cityName: string): string => {
+  if (status === 400) return 'Invalid location. Please check the city name.';
+  if (status === 401) return 'API key invalid. Please check configuration.';
+  if (status === 404) return 'City not found. Try a different location.';
+  if (status === 429) return 'Too many requests. Please try again later.';
+  if (status >= 500) return 'Weather service is temporarily unavailable.';
+  return `Unable to fetch weather for "${cityName}". Please try again.`;
+};
+
+export const fetchWeatherData = async (cityName: string): Promise<unknown> => {
   const cacheKey = cityName.toLowerCase();
   const cached = cache.get(cacheKey);
-  
+
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return cached.data;
   }
 
-  const resp = await fetch(
-    `${BASE_URL}/${cityName}?unitGroup=us&key=${API_KEY}&contentType=json`
-  );
-  
-  if (!resp.ok) throw new Error('City not found');
-  
-  const data = await resp.json();
-  cache.set(cacheKey, { data, timestamp: Date.now() });
-  
-  return data;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const resp = await fetch(
+        `${BASE_URL}/${cityName}?unitGroup=us&key=${API_KEY}&contentType=json`
+      );
+
+      if (!resp.ok) {
+        throw new Error(getUserFacingError(resp.status, cityName));
+      }
+
+      const data = await resp.json();
+      cache.set(cacheKey, { data, timestamp: Date.now() });
+      return data;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error('Failed to fetch weather');
+      if (attempt < MAX_RETRIES) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1));
+      }
+    }
+  }
+
+  throw lastError ?? new Error('City not found');
 };
 
 export const parseCurrentWeather = (data: any): WeatherData => {
