@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Moon, Sun, GitCompare, Github } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Moon, Sun, GitCompare, Github, Home } from 'lucide-react';
 import { useWeather, useGeolocation, useTheme, useFavorites } from '../hooks';
 import { useWeatherStore } from '../store/weatherStore';
 import WeatherCard from './WeatherCard';
@@ -38,6 +39,13 @@ const WeatherApp = () => {
               Weather
             </h1>
             <div className="flex gap-2">
+              <Link
+                to="/"
+                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
+                title="Back to home"
+              >
+                <Home size={18} className="text-white" />
+              </Link>
               <a
                 href="https://github.com/KOUSTAV2409/weather_app"
                 target="_blank"

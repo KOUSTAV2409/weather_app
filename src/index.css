@@ -154,3 +154,8 @@ body {
 .weather-icon.stormy {
   animation: pulse 1s ease-in-out infinite;
 }
+
+/* Landing page font */
+.font-calligraphic {
+  font-family: 'Great Vibes', cursive;
+}
