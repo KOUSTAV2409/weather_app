@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Search, Clock, Star, Globe } from 'lucide-react';
 import { getSearchHistory, getFavorites } from '../utils/storage';
-import { debounce } from '../utils/helpers';
 
 interface Props {
   onSearch: (city: string) => void;
@@ -22,6 +21,10 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
   const [history, setHistory] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [filteredCities, setFilteredCities] = useState<string[]>([]);
+
+  useEffect(() => {
+    setInput(defaultValue);
+  }, [defaultValue]);
 
   useEffect(() => {
     setHistory(getSearchHistory());
@@ -47,10 +50,6 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
     }
   };
 
-  const handleInputChange = debounce((value: string) => {
-    setInput(value);
-  }, 300);
-
   const selectSuggestion = (city: string) => {
     setInput(city);
     onSearch(city);
@@ -64,8 +63,8 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" size={18} />
           <input
             type="text"
-            defaultValue={input}
-            onChange={(e) => handleInputChange(e.target.value)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search location..."
             className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-black text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-gray-900 dark:focus:border-white outline-none transition-colors text-sm"

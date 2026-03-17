@@ -3,6 +3,7 @@ import { FavoriteCity } from '../types/weather';
 const FAVORITES_KEY = 'weather_favorites';
 const HISTORY_KEY = 'weather_history';
 const UNIT_KEY = 'weather_unit';
+const DARK_MODE_KEY = 'weather_dark_mode';
 
 export const getFavorites = (): FavoriteCity[] => {
   try {
@@ -48,4 +49,14 @@ export const getTemperatureUnit = (): 'C' | 'F' => {
 
 export const setTemperatureUnit = (unit: 'C' | 'F'): void => {
   localStorage.setItem(UNIT_KEY, unit);
+};
+
+export const getDarkMode = (): boolean => {
+  const stored = localStorage.getItem(DARK_MODE_KEY);
+  if (stored === null) return true;
+  return stored === 'true';
+};
+
+export const setDarkMode = (enabled: boolean): void => {
+  localStorage.setItem(DARK_MODE_KEY, String(enabled));
 };

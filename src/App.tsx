@@ -1,5 +1,5 @@
 
-import WeatherApp from "./Components/WeatherApp"
+import WeatherApp from "./components/WeatherApp"
 
 
 
