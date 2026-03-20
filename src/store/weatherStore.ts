@@ -37,7 +37,7 @@ interface WeatherState {
 }
 
 export const useWeatherStore = create<WeatherState>((set, get) => ({
-  city: 'New York',
+  city: '',
   weatherData: null,
   hourlyData: [],
   dailyData: [],
@@ -53,15 +53,16 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const data = await fetchWeatherData(cityName);
+      const weatherData = parseCurrentWeather(data);
       set({
-        weatherData: parseCurrentWeather(data),
+        weatherData,
         hourlyData: parseHourlyForecast(data),
         dailyData: parseDailyForecast(data),
-        city: cityName,
+        city: weatherData.resolvedAddress,
         loading: false,
         error: null,
       });
-      addToHistory(cityName);
+      addToHistory(weatherData.resolvedAddress);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch weather';
       set({ error: message, loading: false });

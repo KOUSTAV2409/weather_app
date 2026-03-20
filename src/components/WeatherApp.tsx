@@ -21,7 +21,7 @@ import { getWeatherGradientStyle } from '../utils/helpers';
 const WeatherApp = () => {
   const [showComparison, setShowComparison] = useState(false);
 
-  const { city, weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
+  const { weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
   const { getLocation, error: locationError, isLocating, clearError } = useGeolocation();
   const { darkMode, toggleDarkMode } = useTheme();
   const unit = useWeatherStore((s) => s.unit);
@@ -88,7 +88,7 @@ const WeatherApp = () => {
           {/* Search */}
           <div className="mb-8">
             <SearchBar
-              defaultValue={city}
+              defaultValue={weatherData ? weatherData.resolvedAddress : ''}
               onSearch={(c) => {
                 clearError();
                 search(c);
@@ -106,6 +106,14 @@ const WeatherApp = () => {
 
           {/* Loading */}
           {(loading || isLocating) && <LoadingSkeleton />}
+
+          {/* Empty state - no default fetch */}
+          {!loading && !isLocating && !weatherData && (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+              <p className="text-white/60 text-lg mb-2">Search for a city or use your location</p>
+              <p className="text-white/40 text-sm">Enter a place name above or tap the location button</p>
+            </div>
+          )}
 
           {/* Content */}
           <ErrorBoundary>
