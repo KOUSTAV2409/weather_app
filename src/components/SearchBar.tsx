@@ -8,6 +8,7 @@ interface Props {
   onSearch: (city: string) => void;
   onLocationFetch: () => void;
   defaultValue: string;
+  centered?: boolean;
 }
 
 // Popular cities for quick suggestions when API returns nothing
@@ -17,7 +18,7 @@ const POPULAR_CITIES = [
   'Dubai', 'Singapore', 'Toronto', 'Berlin', 'Madrid'
 ];
 
-const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
+const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }: Props) => {
   const [input, setInput] = useState(defaultValue);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
@@ -112,26 +113,35 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue }: Props) => {
     history.length > 0;
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div className={`relative w-full ${centered ? 'max-w-2xl' : 'max-w-2xl'}`}>
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+          <Search
+            className={`absolute left-4 top-1/2 -translate-y-1/2 text-white/40 ${centered ? 'md:left-5' : ''}`}
+            size={centered ? 22 : 18}
+          />
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search city or place..."
-            className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-white/20 bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-200 text-sm"
+            className={`w-full pl-11 pr-4 rounded-xl border border-white/20 bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-200 ${
+              centered
+                ? 'py-4 md:py-5 text-base md:text-lg pl-12 md:pl-14 rounded-2xl shadow-lg shadow-black/20'
+                : 'py-3.5 text-sm'
+            }`}
           />
         </div>
         <button
           type="button"
           onClick={onLocationFetch}
-          className="p-3.5 border border-white/20 rounded-xl bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-200"
+          className={`border border-white/20 rounded-xl bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-200 ${
+            centered ? 'p-4 md:p-5 rounded-2xl' : 'p-3.5'
+          }`}
           title="Use my location"
         >
-          <MapPin size={18} className="text-white/80" />
+          <MapPin size={centered ? 22 : 18} className="text-white/80" />
         </button>
       </form>
 
