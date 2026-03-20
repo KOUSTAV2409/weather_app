@@ -29,6 +29,58 @@ export const getWeatherBackground = (condition: string): string => {
   return 'from-blue-50 to-white';
 };
 
+/** Returns CSS gradient for dark-mode weather-based background */
+export const getWeatherGradientStyle = (condition: string): { background: string } => {
+  const c = condition.toLowerCase();
+  // Sunny/Clear: warm amber, orange
+  if (c.includes('clear') || c.includes('sun')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(30,20,10,1) 30%, rgba(120,60,20,0.4) 70%, rgba(251,146,60,0.15) 100%)',
+    };
+  }
+  // Rainy: cool blue, slate
+  if (c.includes('rain') || c.includes('drizzle')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(15,25,45,1) 40%, rgba(30,58,138,0.5) 80%, rgba(59,130,246,0.2) 100%)',
+    };
+  }
+  // Stormy: dark purple, deep gray
+  if (c.includes('storm') || c.includes('thunder')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(30,20,40,1) 50%, rgba(88,28,135,0.4) 85%, rgba(126,34,206,0.15) 100%)',
+    };
+  }
+  // Snowy: cool blue-white
+  if (c.includes('snow')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(15,30,50,1) 40%, rgba(56,189,248,0.25) 80%, rgba(186,230,253,0.1) 100%)',
+    };
+  }
+  // Fog/Mist: muted gray
+  if (c.includes('fog') || c.includes('mist') || c.includes('haze')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(30,35,40,1) 50%, rgba(100,116,139,0.3) 100%)',
+    };
+  }
+  // Cloudy: soft blue-gray
+  if (c.includes('cloud') || c.includes('overcast')) {
+    return {
+      background:
+        'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(20,30,45,1) 40%, rgba(71,85,105,0.35) 80%, rgba(148,163,184,0.1) 100%)',
+    };
+  }
+  // Default: neutral dark
+  return {
+    background:
+      'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(20,25,35,1) 60%, rgba(59,130,246,0.1) 100%)',
+  };
+};
+
 export const getWeatherIconClass = (condition: string): string => {
   const c = condition.toLowerCase();
   if (c.includes('clear') || c.includes('sun')) return 'weather-icon sunny';
@@ -39,7 +91,7 @@ export const getWeatherIconClass = (condition: string): string => {
   return 'weather-icon';
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {
