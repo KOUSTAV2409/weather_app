@@ -126,7 +126,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search city or place..."
-            className={`w-full pl-11 pr-4 rounded-xl border border-white/20 bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-200 ${
+            className={`w-full pl-11 pr-4 rounded-xl border border-white/20 bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-300 ease-out ${
               centered
                 ? 'py-4 md:py-5 text-base md:text-lg pl-12 md:pl-14 rounded-2xl shadow-lg shadow-black/20'
                 : 'py-3.5 text-sm'
@@ -136,7 +136,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
         <button
           type="button"
           onClick={onLocationFetch}
-          className={`border border-white/20 rounded-xl bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-200 ${
+          className={`border border-white/20 rounded-xl bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-300 ease-out ${
             centered ? 'p-4 md:p-5 rounded-2xl' : 'p-3.5'
           }`}
           title="Use my location"
