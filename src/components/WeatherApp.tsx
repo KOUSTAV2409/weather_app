@@ -34,15 +34,21 @@ const WeatherApp = () => {
     ? getWeatherGradientStyle(weatherData.weatherCondition)
     : { background: '#000' };
 
+  const hasWeather = !!(weatherData && !loading && !isLocating);
+
   return (
     <div className={darkMode ? 'dark' : ''}>
       <div
         className="min-h-screen transition-[background] duration-700 ease-out p-4 md:p-8"
         style={gradientStyle}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+        <div className="max-w-4xl mx-auto relative">
+          {/* Header - compact when centered, full when weather shown */}
+          <div
+            className={`flex justify-between items-center transition-all duration-300 ${
+              hasWeather ? 'mb-8' : 'absolute top-0 left-0 right-0 p-4 md:p-8 z-10'
+            }`}
+          >
             <h1 className="text-2xl md:text-3xl font-calligraphic text-white">
               Weather
             </h1>
@@ -63,19 +69,23 @@ const WeatherApp = () => {
               >
                 <Github size={18} className="text-white" />
               </a>
-              <button
-                onClick={() => setShowComparison(true)}
-                className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white flex items-center gap-2"
-              >
-                <GitCompare size={16} />
-                Compare
-              </button>
-              <button
-                onClick={toggleUnit}
-                className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white"
-              >
-                °{unit}
-              </button>
+              {hasWeather && (
+                <>
+                  <button
+                    onClick={() => setShowComparison(true)}
+                    className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white flex items-center gap-2"
+                  >
+                    <GitCompare size={16} />
+                    Compare
+                  </button>
+                  <button
+                    onClick={toggleUnit}
+                    className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white"
+                  >
+                    °{unit}
+                  </button>
+                </>
+              )}
               <button
                 onClick={toggleDarkMode}
                 className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
@@ -85,16 +95,28 @@ const WeatherApp = () => {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="mb-8">
-            <SearchBar
-              defaultValue={weatherData ? weatherData.resolvedAddress : ''}
-              onSearch={(c) => {
-                clearError();
-                search(c);
-              }}
-              onLocationFetch={getLocation}
-            />
+          {/* Search - centered Google-style when empty, default position when weather shown */}
+          <div
+            className={`transition-all duration-500 ${
+              hasWeather
+                ? 'mb-8'
+                : 'min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center -mt-8'
+            }`}
+          >
+            {!hasWeather && (
+              <p className="text-white/50 text-sm mb-6">Search for a city or use your location</p>
+            )}
+            <div className={hasWeather ? '' : 'w-full max-w-2xl mx-auto'}>
+              <SearchBar
+                defaultValue={weatherData ? weatherData.resolvedAddress : ''}
+                onSearch={(c) => {
+                  clearError();
+                  search(c);
+                }}
+                onLocationFetch={getLocation}
+                centered={!hasWeather}
+              />
+            </div>
           </div>
 
           {/* Error */}
@@ -106,14 +128,6 @@ const WeatherApp = () => {
 
           {/* Loading */}
           {(loading || isLocating) && <LoadingSkeleton />}
-
-          {/* Empty state - no default fetch */}
-          {!loading && !isLocating && !weatherData && (
-            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-              <p className="text-white/60 text-lg mb-2">Search for a city or use your location</p>
-              <p className="text-white/40 text-sm">Enter a place name above or tap the location button</p>
-            </div>
-          )}
 
           {/* Content */}
           <ErrorBoundary>
