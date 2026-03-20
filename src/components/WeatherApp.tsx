@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Moon, Sun, GitCompare, Github, Home } from 'lucide-react';
 import { useWeather, useGeolocation, useTheme, useFavorites } from '../hooks';
@@ -35,6 +35,60 @@ const WeatherApp = () => {
     : { background: '#000' };
 
   const hasWeather = !!(weatherData && !loading && !isLocating);
+
+  // Smoothly animate the search section from "centered" -> "top" when weather appears.
+  // This uses a lightweight FLIP-style transform (no extra dependency).
+  const searchSectionRef = useRef<HTMLDivElement | null>(null);
+  const startRectRef = useRef<DOMRect | null>(null);
+  const prevHasWeatherRef = useRef(hasWeather);
+
+  useLayoutEffect(() => {
+    const el = searchSectionRef.current;
+    if (!el) return;
+
+    const prevHasWeather = prevHasWeatherRef.current;
+
+    if (!prevHasWeather && hasWeather && startRectRef.current) {
+      const startRect = startRectRef.current;
+      const endRect = el.getBoundingClientRect();
+
+      const dx = startRect.left - endRect.left;
+      const dy = startRect.top - endRect.top;
+
+      const durationMs = 560;
+      const ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+      el.style.willChange = 'transform, opacity';
+      el.style.transition = 'none';
+      el.style.transform = `translate(${dx}px, ${dy}px) scale(0.985)`;
+      el.style.opacity = '0.0';
+
+      // Flush style.
+      el.getBoundingClientRect();
+
+      el.style.transition = `transform ${durationMs}ms ${ease}, opacity ${durationMs}ms ${ease}`;
+      requestAnimationFrame(() => {
+        el.style.transform = 'translate(0px, 0px) scale(1)';
+        el.style.opacity = '1';
+      });
+
+      const cleanupTimer = window.setTimeout(() => {
+        el.style.willChange = '';
+        el.style.transition = '';
+        el.style.transform = '';
+        el.style.opacity = '';
+      }, durationMs + 80);
+
+      return () => window.clearTimeout(cleanupTimer);
+    }
+
+    // Store the last "centered" rect so we can animate from it.
+    if (!hasWeather) {
+      startRectRef.current = el.getBoundingClientRect();
+    }
+
+    prevHasWeatherRef.current = hasWeather;
+  }, [hasWeather]);
 
   return (
     <div className={darkMode ? 'dark' : ''}>
@@ -97,7 +151,8 @@ const WeatherApp = () => {
 
           {/* Search - centered Google-style when empty, default position when weather shown */}
           <div
-            className={`transition-all duration-500 ${
+            ref={searchSectionRef}
+            className={`${
               hasWeather
                 ? 'mb-8'
                 : 'min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center -mt-8'
@@ -106,7 +161,7 @@ const WeatherApp = () => {
             {!hasWeather && (
               <p className="text-white/50 text-sm mb-6">Search for a city or use your location</p>
             )}
-            <div className={hasWeather ? '' : 'w-full max-w-2xl mx-auto'}>
+            <div className="w-full max-w-2xl mx-auto">
               <SearchBar
                 defaultValue={weatherData ? weatherData.resolvedAddress : ''}
                 onSearch={(c) => {
