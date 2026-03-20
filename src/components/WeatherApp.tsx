@@ -16,11 +16,12 @@ import WeatherQuiz from './WeatherQuiz';
 import WeatherSounds from './WeatherSounds';
 import WeatherMap from './WeatherMap';
 import { ErrorBoundary } from './ErrorBoundary';
+import { getWeatherGradientStyle } from '../utils/helpers';
 
 const WeatherApp = () => {
   const [showComparison, setShowComparison] = useState(false);
 
-  const { city, weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
+  const { weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
   const { getLocation, error: locationError, isLocating, clearError } = useGeolocation();
   const { darkMode, toggleDarkMode } = useTheme();
   const unit = useWeatherStore((s) => s.unit);
@@ -29,9 +30,16 @@ const WeatherApp = () => {
 
   const displayError = error ?? locationError;
 
+  const gradientStyle = weatherData
+    ? getWeatherGradientStyle(weatherData.weatherCondition)
+    : { background: '#000' };
+
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-black transition-colors p-4 md:p-8">
+      <div
+        className="min-h-screen transition-[background] duration-700 ease-out p-4 md:p-8"
+        style={gradientStyle}
+      >
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
@@ -80,7 +88,7 @@ const WeatherApp = () => {
           {/* Search */}
           <div className="mb-8">
             <SearchBar
-              defaultValue={city}
+              defaultValue={weatherData ? weatherData.resolvedAddress : ''}
               onSearch={(c) => {
                 clearError();
                 search(c);
@@ -98,6 +106,14 @@ const WeatherApp = () => {
 
           {/* Loading */}
           {(loading || isLocating) && <LoadingSkeleton />}
+
+          {/* Empty state - no default fetch */}
+          {!loading && !isLocating && !weatherData && (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+              <p className="text-white/60 text-lg mb-2">Search for a city or use your location</p>
+              <p className="text-white/40 text-sm">Enter a place name above or tap the location button</p>
+            </div>
+          )}
 
           {/* Content */}
           <ErrorBoundary>

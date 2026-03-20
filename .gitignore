@@ -1,3 +1,11 @@
+# Environment
+.env
+.env.*
+
+# Non-essential docs (keep README.md)
+*.md
+!README.md
+
 # Logs
 logs
 *.log

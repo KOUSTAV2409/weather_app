@@ -76,12 +76,12 @@ Add an error boundary around the main content so a single component crash doesn�
 
 ## UX/UI Enhancements
 
-### 1. Theming & Visual Identity
+### 1. Theming & Visual Identity ✅ (Weather gradients)
 - **Current:** Light/dark with Vercel-style variables.
-- **Improvements:**
-  - Add a **weather-based theme** (e.g. blue for rain, warm for sunny)
+- **Done:**
+  - ✅ **Weather-based gradient backgrounds** – Background changes with conditions (sunny → warm amber/orange, rainy → cool blue, stormy → dark purple, cloudy → blue-gray, snowy → cool blue-white, fog → muted gray)
+- **Remaining:**
   - Use **Geist** or a similar font for a more distinct look
-  - Add a **gradient background** that changes with conditions (e.g. blue for rain, orange for sunset)
   - Optional **glassmorphism** for cards (backdrop-blur, subtle borders)
 
 ### 2. Responsive Design
@@ -174,7 +174,7 @@ Add an error boundary around the main content so a single component crash doesn�
 4. Improve error handling in the API layer
 
 ### Phase 3 – UX Polish (2–3 days)
-1. Weather-based gradient backgrounds
+1. ~~Weather-based gradient backgrounds~~ ✅ Done
 2. Better responsive layout
 3. Accessibility improvements
 4. Staggered animations
@@ -184,6 +184,24 @@ Add an error boundary around the main content so a single component crash doesn�
 2. Weather notifications
 3. Shareable weather cards
 4. Use `feelsLikeInsights` and add AI-style summaries
+
+---
+
+## Build in Public – Progress Log
+
+| Date | Shipped | Tweet |
+|------|---------|-------|
+| Mar 2025 | Critical fixes (SearchBar, theme persistence, folder structure) | — |
+| Mar 2025 | Architecture (Zustand, hooks, error boundary, API retries) | — |
+| Mar 2025 | Landing page, features grid, video placeholder, footer branding | — |
+| Mar 2025 | **Weather-based gradient backgrounds** | "The app now changes color based on the weather. Sunny = warm, rainy = blue." |
+| Mar 2025 | **Dual API with Open-Meteo fallback** | Visual Crossing first, Open-Meteo (no key) on failure. Works without API key. |
+
+### Next Up (in order)
+1. Use `feelsLikeInsights` (quick win)
+2. PWA – add to home screen
+3. Shareable weather card
+4. Responsive fixes (WeatherCard 2 cols on mobile)
 
 ---
 
