@@ -195,6 +195,7 @@ Add an error boundary around the main content so a single component crash doesn�
 | Mar 2025 | Architecture (Zustand, hooks, error boundary, API retries) | — |
 | Mar 2025 | Landing page, features grid, video placeholder, footer branding | — |
 | Mar 2025 | **Weather-based gradient backgrounds** | "The app now changes color based on the weather. Sunny = warm, rainy = blue." |
+| Mar 2025 | **Dual API with Open-Meteo fallback** | Visual Crossing first, Open-Meteo (no key) on failure. Works without API key. |
 
 ### Next Up (in order)
 1. Use `feelsLikeInsights` (quick win)

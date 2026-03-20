@@ -43,7 +43,7 @@ export const searchLocations = async (query: string): Promise<GeocodingResult[]>
   const data = (await resp.json()) as GeocodingResponse;
   if (!data.results?.length) return [];
 
-  return data.results.map((r) => {
+  return data.results.map((r: OpenMeteoResult) => {
     const parts = [r.name, r.admin1, r.admin2, r.country].filter(Boolean);
     const displayName = parts.join(', ');
     return {
@@ -58,4 +58,18 @@ export const searchLocations = async (query: string): Promise<GeocodingResult[]>
       query: `${r.latitude},${r.longitude}`,
     };
   });
+};
+
+/** Get first matching location for weather API fallback */
+export const geocodeToCoords = async (
+  query: string
+): Promise<{ lat: number; lon: number; displayName: string } | null> => {
+  const results = await searchLocations(query);
+  if (!results.length) return null;
+  const r = results[0];
+  return {
+    lat: r.latitude,
+    lon: r.longitude,
+    displayName: r.displayName,
+  };
 };
