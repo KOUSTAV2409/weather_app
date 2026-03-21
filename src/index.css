@@ -169,6 +169,39 @@
   animation: shimmer 2s infinite;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Staggered entrance for forecast sections (respect reduced motion via short duration) */
+.weather-stagger > * {
+  opacity: 0;
+  animation: fadeIn 0.42s ease-out forwards;
+}
+.weather-stagger > *:nth-child(1) { animation-delay: 0.03s; }
+.weather-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.weather-stagger > *:nth-child(3) { animation-delay: 0.09s; }
+.weather-stagger > *:nth-child(4) { animation-delay: 0.12s; }
+.weather-stagger > *:nth-child(5) { animation-delay: 0.15s; }
+.weather-stagger > *:nth-child(6) { animation-delay: 0.18s; }
+.weather-stagger > *:nth-child(7) { animation-delay: 0.21s; }
+.weather-stagger > *:nth-child(8) { animation-delay: 0.24s; }
+.weather-stagger > *:nth-child(9) { animation-delay: 0.27s; }
+.weather-stagger > *:nth-child(10) { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .weather-stagger > * {
+    opacity: 1;
+    animation: none;
+  }
+}
+
 /* Geist Font Styling */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;

@@ -84,38 +84,36 @@ This section is closed. Summary of what’s in the codebase:
 
 ---
 
-## UX/UI Enhancements
+## UX/UI Enhancements — **DONE** ✅
 
-### 1. Theming & Visual Identity ✅ (Weather gradients)
-- **Current:** Light/dark with Vercel-style variables.
-- **Done:**
-  - ✅ **Weather-based gradient backgrounds** – Background changes with conditions (sunny → warm amber/orange, rainy → cool blue, stormy → dark purple, cloudy → blue-gray, snowy → cool blue-white, fog → muted gray)
-- **Remaining:**
-  - Optional **glassmorphism** for cards (backdrop-blur, subtle borders)
-- **Done:** **Geist** variable font is loaded in global CSS
+This section is closed. Implemented behavior:
 
-### 2. Responsive Design
-- Layout is generally responsive, but:
-  - WeatherCard grid (4 columns) may be cramped on small screens → use 2 columns on mobile
-  - Hourly forecast scroll could show “current hour” first
-  - Add touch-friendly tap targets (min 44px)
+### 1. Theming & visual identity ✅
+- **Weather-based gradient backgrounds** (unchanged).
+- **Geist** font (unchanged).
+- **Glass-style panels:** shared **`glassPanel`** helper in **`src/utils/helpers.ts`** — applied to **`WeatherCard`**, **`HourlyForecast`**, **`DailyForecast`**; map container uses matching **backdrop-blur** + translucent border.
 
-### 3. Loading & Skeleton
-- LoadingSkeleton exists; ensure it matches the final layout
-- Add **skeleton for the map** while it loads
-- Consider **optimistic UI** for favorites (update UI before API/localStorage)
+### 2. Responsive design ✅
+- **WeatherCard** metrics use **`grid-cols-2` / `sm:grid-cols-4`** (already mobile-friendly).
+- **Hourly strip:** **`orderHourlyFromCurrentHour`** in **`src/utils/hourlyOrder.ts`** rotates slots so the **current local hour** (using API **IANA timezone**) is **first**; horizontal scroll resets to start.
+- **Touch targets:** header controls use at least **`min-h-11 min-w-11`** (44px) where appropriate; map zoom controls already sized similarly.
 
-### 4. Accessibility
-- Add `aria-live` for dynamic content (weather updates, errors)
-- Ensure focus management in modals (trap focus, close on Escape)
-- Add `aria-label` for icon-only buttons (theme, unit, location)
-- Check contrast for text and icons
+### 3. Loading & skeleton ✅
+- **`LoadingSkeleton`** layout aligned with the card grid (**2 / 4 columns**, semantic **border-border**).
+- **Map:** **`onMapReady`** callback on **`Map`** (`map.tsx`) + **`Skeleton`** overlay in **`WeatherMap.tsx`** until the map loads.
+- **Favorites:** Zustand updates the **favorites array first**, then **`localStorage`** (**optimistic** UI).
 
-### 5. Micro-interactions
-- **Pull-to-refresh** on mobile
-- **Haptic feedback** where supported
-- **Staggered fade-in** for cards
-- **Smooth scroll** to sections when navigating
+### 4. Accessibility ✅
+- **`role="alert"`** + **`aria-live="assertive"`** on the error banner.
+- **`aria-live="polite"`** + **`sr-only`** summary when forecast loads (location + condition).
+- **Icon-only / compact controls:** **`aria-label`** on home, GitHub, refresh, compare, unit, theme; search location was already labeled in **`SearchBar`**.
+- **Compare dialog:** Radix **`Dialog`** provides **focus trap** and **Escape** to close (shadcn default).
+
+### 5. Micro-interactions ✅
+- **Refresh:** toolbar **Refresh** button refetches (practical alternative to **pull-to-refresh**; no gesture hook).
+- **Haptics:** **`navigator.vibrate(12)`** on **favorite** toggle when supported.
+- **Staggered fade-in:** **`.weather-stagger`** on the forecast stack + CSS nth-child delays; **`prefers-reduced-motion`** disables animation.
+- **Smooth scroll:** **`html { scroll-behavior: smooth }`** with **`prefers-reduced-motion`** override.
 
 ---
 

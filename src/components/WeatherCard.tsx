@@ -1,5 +1,5 @@
 import { WeatherData, TemperatureUnit } from '../types/weather';
-import { convertTemp, formatDate, getWeekday, getWeatherIconClass } from '../utils/helpers';
+import { convertTemp, formatDate, getWeekday, getWeatherIconClass, glassPanel } from '../utils/helpers';
 import { getActivitySuggestion } from '../utils/activitySuggestions';
 import { Star } from 'lucide-react';
 import {
@@ -22,7 +22,7 @@ interface Props {
 }
 
 const WeatherCard = ({ data, unit, isFavorite, onToggleFavorite }: Props) => (
-  <Card className="fade-in border-border/80">
+  <Card className={cn('fade-in border-border/80', glassPanel)}>
     <CardHeader className="border-border border-b pb-4">
       <CardTitle className="text-2xl font-medium tracking-tight">
         {data.resolvedAddress}

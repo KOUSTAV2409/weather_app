@@ -83,13 +83,18 @@ export const useWeatherStore = create<WeatherState>((set, get) => ({
   },
 
   addFavorite: (city) => {
+    const { favorites } = get();
+    if (favorites.some((f) => f.toLowerCase() === city.toLowerCase())) return;
+    set({ favorites: [...favorites, city] });
     addFavoriteStorage(city);
-    set({ favorites: getFavorites().map((f) => f.name) });
   },
 
   removeFavorite: (city) => {
+    const { favorites } = get();
+    set({
+      favorites: favorites.filter((f) => f.toLowerCase() !== city.toLowerCase()),
+    });
     removeFavoriteStorage(city);
-    set({ favorites: getFavorites().map((f) => f.name) });
   },
 
   refreshFavorites: () => {
