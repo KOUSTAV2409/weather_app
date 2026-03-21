@@ -1,28 +1,46 @@
 import { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { WeatherData, TemperatureUnit } from '../types/weather';
 import { convertTemp } from '../utils/helpers';
 import { fetchWeatherData, parseCurrentWeather } from '../services/weatherService';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 interface Props {
   unit: TemperatureUnit;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const WeatherComparison = ({ unit, onClose }: Props) => {
+const WeatherComparison = ({ unit, open, onOpenChange }: Props) => {
   const [cities, setCities] = useState<WeatherData[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const addCity = async () => {
     if (!input.trim() || cities.length >= 3) return;
     setLoading(true);
+    setError(null);
     try {
       const data = await fetchWeatherData(input);
       setCities([...cities, parseCurrentWeather(data)]);
       setInput('');
     } catch {
-      alert('City not found');
+      setError('City not found. Try another name or spelling.');
     } finally {
       setLoading(false);
     }
@@ -31,70 +49,101 @@ const WeatherComparison = ({ unit, onClose }: Props) => {
   const removeCity = (idx: number) => setCities(cities.filter((_, i) => i !== idx));
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-medium text-gray-900 dark:text-white">Compare Cities</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg">
-            <X size={20} className="text-gray-600 dark:text-gray-400" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton
+        className="flex max-h-[90vh] max-w-[calc(100%-2rem)] flex-col gap-4 overflow-y-auto sm:max-w-4xl"
+      >
+        <DialogHeader>
+          <DialogTitle>Compare cities</DialogTitle>
+          <DialogDescription>
+            Add up to three locations to compare current conditions side by side.
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="flex gap-2 mb-6">
-          <input
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setError(null);
+            }}
             onKeyDown={(e) => e.key === 'Enter' && addCity()}
-            placeholder="Enter city name..."
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-black text-gray-900 dark:text-white"
+            placeholder="Enter city name…"
             disabled={cities.length >= 3}
+            className="min-h-9 flex-1"
+            aria-invalid={error ? true : undefined}
           />
-          <button
+          <Button
+            type="button"
             onClick={addCity}
-            disabled={loading || cities.length >= 3}
-            className="px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-lg hover:opacity-80 disabled:opacity-50"
+            disabled={loading || cities.length >= 3 || !input.trim()}
+            className="shrink-0 sm:w-auto"
           >
-            <Plus size={20} />
-          </button>
+            <Plus data-icon="inline-start" />
+            Add
+          </Button>
         </div>
 
-        {cities.length === 0 && (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-12">Add cities to compare (max 3)</p>
+        {error && (
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {cities.length === 0 && (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            Add cities to compare (max 3).
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {cities.map((city, idx) => (
-            <div key={idx} className="border border-gray-300 dark:border-gray-700 rounded-xl p-4 relative">
-              <button
+            <Card key={`${city.resolvedAddress}-${idx}`} size="sm" className="relative gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2"
                 onClick={() => removeCity(idx)}
-                className="absolute top-2 right-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-900 rounded"
+                aria-label={`Remove ${city.resolvedAddress}`}
               >
-                <X size={16} className="text-gray-500" />
-              </button>
-              <h3 className="font-medium text-gray-900 dark:text-white mb-2 pr-6">{city.resolvedAddress}</h3>
-              <div className="text-4xl font-light text-gray-900 dark:text-white mb-2">
-                {convertTemp(city.temperature, unit)}°{unit}
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{city.weatherCondition}</p>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Feels Like</span>
-                  <span className="text-gray-900 dark:text-white">{convertTemp(city.feelsLike, unit)}°</span>
+                <X />
+              </Button>
+              <CardHeader className="pr-10">
+                <CardTitle className="line-clamp-2 text-base leading-snug">
+                  {city.resolvedAddress}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 pt-0">
+                <div className="text-4xl font-light text-foreground">
+                  {convertTemp(city.temperature, unit)}°{unit}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Humidity</span>
-                  <span className="text-gray-900 dark:text-white">{city.humidity}%</span>
+                <p className="text-sm text-muted-foreground">{city.weatherCondition}</p>
+                <div className="flex flex-col gap-1 text-xs">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Feels like</span>
+                    <span className="font-medium text-foreground">
+                      {convertTemp(city.feelsLike, unit)}°
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Humidity</span>
+                    <span className="font-medium text-foreground">{city.humidity}%</span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Wind</span>
+                    <span className="font-medium text-foreground">
+                      {Math.round(city.windSpeed)} mph
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Wind</span>
-                  <span className="text-gray-900 dark:text-white">{Math.round(city.windSpeed)} mph</span>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

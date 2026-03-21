@@ -3,6 +3,9 @@ import { MapPin, Search, Clock, Star, Globe } from 'lucide-react';
 import { getSearchHistory, getFavorites } from '../utils/storage';
 import { searchLocations, type GeocodingResult } from '../services/geocodingService';
 import { debounce } from '../utils/helpers';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
   onSearch: (city: string) => void;
@@ -11,11 +14,10 @@ interface Props {
   centered?: boolean;
 }
 
-// Popular cities for quick suggestions when API returns nothing
 const POPULAR_CITIES = [
   'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix',
   'London', 'Paris', 'Tokyo', 'Sydney', 'Mumbai',
-  'Dubai', 'Singapore', 'Toronto', 'Berlin', 'Madrid'
+  'Dubai', 'Singapore', 'Toronto', 'Berlin', 'Madrid',
 ];
 
 const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }: Props) => {
@@ -28,7 +30,6 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
   const [apiLoading, setApiLoading] = useState(false);
 
   useEffect(() => {
-    // Don't overwrite with lat,lon - keep the human-readable display name from geocoding
     const trimmed = defaultValue.trim();
     const isCoordinateFormat = /^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(trimmed) ||
       /^-?\d+\.?\d*°?\s*[NS]?\s*,\s*-?\d+\.?\d*°?\s*[EW]?$/i.test(trimmed);
@@ -38,7 +39,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
 
   useEffect(() => {
     setHistory(getSearchHistory());
-    setFavorites(getFavorites().map(f => f.name));
+    setFavorites(getFavorites().map((f) => f.name));
   }, []);
 
   const fetchLocations = useMemo(
@@ -77,7 +78,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
 
   useEffect(() => {
     if (input.trim().length >= 2 && apiSuggestions.length === 0 && !apiLoading) {
-      const filtered = POPULAR_CITIES.filter(city =>
+      const filtered = POPULAR_CITIES.filter((city) =>
         city.toLowerCase().includes(input.toLowerCase())
       ).slice(0, 5);
       setFilteredCities(filtered);
@@ -113,111 +114,117 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
     history.length > 0;
 
   return (
-    <div className={`relative w-full ${centered ? 'max-w-2xl' : 'max-w-2xl'}`}>
+    <div className={cn('relative w-full max-w-2xl')}>
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="relative flex-1">
           <Search
-            className={`absolute left-4 top-1/2 -translate-y-1/2 text-white/40 ${centered ? 'md:left-5' : ''}`}
-            size={centered ? 22 : 18}
+            className={cn(
+              'pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-white/40',
+              centered && 'md:left-5'
+            )}
+            aria-hidden
           />
-          <input
-            type="text"
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search city or place..."
-            className={`w-full pl-11 pr-4 rounded-xl border border-white/20 bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all duration-300 ease-out ${
+            className={cn(
+              'w-full border-white/20 bg-white/5 pr-4 text-white shadow-lg shadow-black/20 placeholder:text-white/40',
+              'focus-visible:border-white/40 focus-visible:ring-white/25',
+              'dark:bg-white/5',
+              '!h-auto',
               centered
-                ? 'py-4 md:py-5 text-base md:text-lg pl-12 md:pl-14 rounded-2xl shadow-lg shadow-black/20'
-                : 'py-3.5 text-sm'
-            }`}
+                ? 'min-h-12 rounded-2xl py-4 pl-12 text-base md:min-h-14 md:pl-14 md:text-lg'
+                : 'min-h-10 rounded-xl py-3 pl-11 text-sm'
+            )}
           />
         </div>
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size={centered ? 'icon-lg' : 'icon'}
           onClick={onLocationFetch}
-          className={`border border-white/20 rounded-xl bg-white/5 hover:border-white/40 hover:bg-white/10 transition-all duration-300 ease-out ${
-            centered ? 'p-4 md:p-5 rounded-2xl' : 'p-3.5'
-          }`}
           title="Use my location"
+          className={cn(
+            'shrink-0 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white',
+            centered && 'size-14 rounded-2xl'
+          )}
         >
-          <MapPin size={centered ? 22 : 18} className="text-white/80" />
-        </button>
+          <MapPin />
+        </Button>
       </form>
 
       {showSuggestions && hasSuggestions && (
-        <div className="absolute top-full mt-2 w-full bg-black/95 backdrop-blur-sm border border-white/20 rounded-xl shadow-xl max-h-64 overflow-y-auto z-50">
+        <div
+          className={cn(
+            'absolute top-full z-50 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-border',
+            'bg-popover/95 text-popover-foreground shadow-lg backdrop-blur-sm'
+          )}
+        >
           {apiLoading && (
-            <div className="p-3 text-sm text-white/50">
-              Searching...
-            </div>
+            <div className="p-3 text-sm text-muted-foreground">Searching…</div>
           )}
           {apiSuggestions.length > 0 && (
-            <div className="p-2">
-              <p className="text-xs text-white/50 px-3 py-2 font-medium">
-                Locations
-              </p>
+            <div className="flex flex-col gap-0 p-2">
+              <p className="px-3 py-2 text-xs font-medium text-muted-foreground">Locations</p>
               {apiSuggestions.map((result) => (
                 <button
                   key={result.id}
+                  type="button"
                   onClick={() => selectApiSuggestion(result)}
-                  className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-white/10 rounded-lg transition-colors text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent"
                 >
-                  <Globe size={14} className="text-blue-400 flex-shrink-0" />
-                  <span className="text-sm text-white truncate">
-                    {result.displayName}
-                  </span>
+                  <Globe className="shrink-0 text-primary" />
+                  <span className="truncate">{result.displayName}</span>
                 </button>
               ))}
             </div>
           )}
           {!apiLoading && apiSuggestions.length === 0 && filteredCities.length > 0 && (
-            <div className="p-2">
-              <p className="text-xs text-white/50 px-3 py-2 font-medium">
-                Popular
-              </p>
+            <div className="flex flex-col gap-0 p-2">
+              <p className="px-3 py-2 text-xs font-medium text-muted-foreground">Popular</p>
               {filteredCities.map((city, i) => (
                 <button
                   key={`${city}-${i}`}
+                  type="button"
                   onClick={() => selectSuggestion(city)}
-                  className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-white/10 rounded-lg transition-colors text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent"
                 >
-                  <Globe size={14} className="text-blue-400" />
-                  <span className="text-sm text-white">{city}</span>
+                  <Globe className="text-primary" />
+                  <span>{city}</span>
                 </button>
               ))}
             </div>
           )}
           {favorites.length > 0 && (
-            <div className="p-2 border-t border-white/10">
-              <p className="text-xs text-white/50 px-3 py-2 font-medium">
-                Favorites
-              </p>
+            <div className="flex flex-col gap-0 border-t border-border p-2">
+              <p className="px-3 py-2 text-xs font-medium text-muted-foreground">Favorites</p>
               {favorites.map((city, i) => (
                 <button
                   key={`fav-${city}-${i}`}
+                  type="button"
                   onClick={() => selectSuggestion(city)}
-                  className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-white/10 rounded-lg transition-colors text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent"
                 >
-                  <Star size={14} className="text-amber-400 fill-amber-400" />
-                  <span className="text-sm text-white">{city}</span>
+                  <Star className="fill-amber-400 text-amber-400" />
+                  <span>{city}</span>
                 </button>
               ))}
             </div>
           )}
           {history.length > 0 && (
-            <div className="p-2 border-t border-white/10">
-              <p className="text-xs text-white/50 px-3 py-2 font-medium">
-                Recent
-              </p>
+            <div className="flex flex-col gap-0 border-t border-border p-2">
+              <p className="px-3 py-2 text-xs font-medium text-muted-foreground">Recent</p>
               {history.map((city, i) => (
                 <button
                   key={`hist-${city}-${i}`}
+                  type="button"
                   onClick={() => selectSuggestion(city)}
-                  className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-white/10 rounded-lg transition-colors text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent"
                 >
-                  <Clock size={14} className="text-white/40" />
-                  <span className="text-sm text-white">{city}</span>
+                  <Clock className="text-muted-foreground" />
+                  <span>{city}</span>
                 </button>
               ))}
             </div>

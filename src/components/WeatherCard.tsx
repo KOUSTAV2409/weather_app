@@ -2,6 +2,17 @@ import { WeatherData, TemperatureUnit } from '../types/weather';
 import { convertTemp, formatDate, getWeekday, getWeatherIconClass } from '../utils/helpers';
 import { getActivitySuggestion } from '../utils/activitySuggestions';
 import { Star } from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 interface Props {
   data: WeatherData;
@@ -11,77 +22,85 @@ interface Props {
 }
 
 const WeatherCard = ({ data, unit, isFavorite, onToggleFavorite }: Props) => (
-  <div className="vercel-card rounded-2xl p-8 fade-in">
-    <div className="flex justify-between items-start mb-12">
-      <div>
-        <h2 className="text-2xl font-medium tracking-tight text-gray-900 dark:text-white mb-1">
-          {data.resolvedAddress}
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(data.date)} · {getWeekday(data.date)}</p>
+  <Card className="fade-in border-border/80">
+    <CardHeader className="border-border border-b pb-4">
+      <CardTitle className="text-2xl font-medium tracking-tight">
+        {data.resolvedAddress}
+      </CardTitle>
+      <CardDescription>
+        {formatDate(data.date)} · {getWeekday(data.date)}
+      </CardDescription>
+      <CardAction>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onToggleFavorite}
+          aria-pressed={isFavorite}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <Star
+            className={cn(isFavorite && 'fill-primary text-primary')}
+          />
+        </Button>
+      </CardAction>
+    </CardHeader>
+
+    <CardContent className="flex flex-col gap-8 pt-6">
+      <div className="flex flex-wrap items-end gap-2">
+        <span className="text-8xl font-light tracking-tighter text-foreground">
+          {convertTemp(data.temperature, unit)}°
+        </span>
+        <span className="mb-3 text-3xl font-light text-muted-foreground">{unit}</span>
+        <span
+          className={cn('mb-2 ml-4 text-6xl sm:ml-8', getWeatherIconClass(data.weatherCondition))}
+        >
+          {data.icon}
+        </span>
       </div>
-      <button
-        onClick={onToggleFavorite}
-        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-      >
-        <Star
-          size={20}
-          className={isFavorite ? 'fill-black dark:fill-white text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}
-        />
-      </button>
-    </div>
 
-    <div className="flex items-end mb-6">
-      <span className="text-8xl font-light tracking-tighter text-gray-900 dark:text-white">
-        {convertTemp(data.temperature, unit)}°
-      </span>
-      <span className="text-3xl font-light text-gray-500 dark:text-gray-400 mb-3 ml-2">{unit}</span>
-      <span className={`text-6xl ml-8 mb-2 ${getWeatherIconClass(data.weatherCondition)}`}>{data.icon}</span>
-    </div>
+      <div className="rounded-lg border border-border bg-muted/50 p-3">
+        <p className="text-sm font-medium text-foreground">{getActivitySuggestion(data)}</p>
+      </div>
 
-    {/* Activity Suggestion */}
-    <div className="mb-8 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
-      <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-        {getActivitySuggestion(data)}
-      </p>
-    </div>
+      <div className="flex flex-col gap-2">
+        <p className="text-lg font-medium capitalize text-foreground">
+          {data.weatherCondition.toLowerCase()}
+        </p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{data.weatherDescription}</p>
+      </div>
 
-    <div className="mb-8">
-      <p className="text-lg font-medium text-gray-900 dark:text-white mb-1 capitalize">
-        {data.weatherCondition.toLowerCase()}
-      </p>
-      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-        {data.weatherDescription}
-      </p>
-    </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[
+          ['Feels Like', `${convertTemp(data.feelsLike, unit)}°`],
+          ['Humidity', `${data.humidity}%`],
+          ['Wind', `${Math.round(data.windSpeed)} mph`],
+          ['UV Index', data.uvIndex.toString()],
+        ].map(([label, value]) => (
+          <div key={label} className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-lg font-medium text-foreground">{value}</p>
+          </div>
+        ))}
+      </div>
 
-    <div className="grid grid-cols-4 gap-4 mb-6">
-      {[
-        ['Feels Like', `${convertTemp(data.feelsLike, unit)}°`],
-        ['Humidity', `${data.humidity}%`],
-        ['Wind', `${Math.round(data.windSpeed)} mph`],
-        ['UV Index', data.uvIndex.toString()],
-      ].map(([label, value]) => (
-        <div key={label} className="border-l border-gray-300 dark:border-gray-700 pl-4">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</p>
-          <p className="text-lg font-medium text-gray-900 dark:text-white">{value}</p>
-        </div>
-      ))}
-    </div>
+      <Separator />
 
-    <div className="grid grid-cols-4 gap-4 pt-6 border-t border-gray-300 dark:border-gray-700">
-      {[
-        ['Pressure', `${Math.round(data.pressure)} mb`],
-        ['Visibility', `${Math.round(data.visibility)} mi`],
-        ['Sunrise', data.sunrise],
-        ['Sunset', data.sunset],
-      ].map(([label, value]) => (
-        <div key={label}>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">{label}</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-white">{value}</p>
-        </div>
-      ))}
-    </div>
-  </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[
+          ['Pressure', `${Math.round(data.pressure)} mb`],
+          ['Visibility', `${Math.round(data.visibility)} mi`],
+          ['Sunrise', data.sunrise],
+          ['Sunset', data.sunset],
+        ].map(([label, value]) => (
+          <div key={label} className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-sm font-medium text-foreground">{value}</p>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
 );
 
 export default WeatherCard;

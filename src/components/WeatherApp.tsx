@@ -15,6 +15,7 @@ import OutfitSuggestions from './OutfitSuggestions';
 import WeatherQuiz from './WeatherQuiz';
 import WeatherSounds from './WeatherSounds';
 import WeatherMap from './WeatherMap';
+import WeatherDashboard from './WeatherDashboard';
 import { ErrorBoundary } from './ErrorBoundary';
 import { getWeatherGradientStyle } from '../utils/helpers';
 
@@ -199,6 +200,7 @@ const WeatherApp = () => {
                   lat={weatherData.latitude}
                   lon={weatherData.longitude}
                   city={weatherData.resolvedAddress}
+                  theme={darkMode ? 'dark' : 'light'}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,6 +210,8 @@ const WeatherApp = () => {
 
                 <HourlyForecast hourly={hourlyData} unit={unit} />
                 <DailyForecast forecast={dailyData} unit={unit} />
+
+                <WeatherDashboard hourly={hourlyData} daily={dailyData} unit={unit} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <WeatherStreaks forecast={dailyData} />
@@ -222,9 +226,11 @@ const WeatherApp = () => {
         {weatherData && <WeatherSounds condition={weatherData.weatherCondition} />}
 
         {/* Comparison Modal */}
-        {showComparison && (
-          <WeatherComparison unit={unit} onClose={() => setShowComparison(false)} />
-        )}
+        <WeatherComparison
+          unit={unit}
+          open={showComparison}
+          onOpenChange={setShowComparison}
+        />
       </div>
     </div>
   );
