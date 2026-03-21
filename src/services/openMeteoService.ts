@@ -1,4 +1,8 @@
 import { WeatherData, HourlyWeather, DailyForecast } from '../types/weather';
+import {
+  INVALID_WEATHER_PAYLOAD,
+  OPEN_METEO_UNAVAILABLE,
+} from './weatherApiErrors';
 
 const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 
@@ -104,7 +108,7 @@ export const fetchOpenMeteoWeather = async (
   });
 
   const resp = await fetch(`${FORECAST_URL}?${params}`);
-  if (!resp.ok) throw new Error('Failed to fetch weather');
+  if (!resp.ok) throw new Error(OPEN_METEO_UNAVAILABLE);
 
   const data = (await resp.json()) as OpenMeteoResponse;
 
@@ -113,7 +117,7 @@ export const fetchOpenMeteoWeather = async (
   const daily = data.daily;
 
   if (!current || !hourly || !daily) {
-    throw new Error('Invalid weather data');
+    throw new Error(INVALID_WEATHER_PAYLOAD);
   }
 
   const todayCode = current.weather_code;

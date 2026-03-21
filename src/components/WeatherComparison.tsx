@@ -3,6 +3,7 @@ import { Plus, X } from 'lucide-react';
 import { WeatherData, TemperatureUnit } from '../types/weather';
 import { convertTemp } from '../utils/helpers';
 import { fetchWeatherData, parseCurrentWeather } from '../services/weatherService';
+import { CITY_NOT_FOUND } from '../services/weatherApiErrors';
 import {
   Dialog,
   DialogContent,
@@ -40,7 +41,7 @@ const WeatherComparison = ({ unit, open, onOpenChange }: Props) => {
       setCities([...cities, parseCurrentWeather(data)]);
       setInput('');
     } catch {
-      setError('City not found. Try another name or spelling.');
+      setError(CITY_NOT_FOUND);
     } finally {
       setLoading(false);
     }

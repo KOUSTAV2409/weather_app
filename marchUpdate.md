@@ -61,34 +61,26 @@ All items below are implemented and verified in code. This section is closed.
 
 ---
 
-## Architecture Improvements ✅
+## Architecture Improvements — **DONE** ✅
 
-### 1. State Management ✅
-All state lives in `WeatherApp.tsx` (~30 lines of state). As features grow, this will become hard to maintain.
+This section is closed. Summary of what’s in the codebase:
 
-**Recommendation:** Introduce a small store (e.g. **Zustand**):
+### 1. State management (Zustand) ✅
+- **`src/store/weatherStore.ts`** — weather payload, loading, error, city, **`darkMode`**, unit, favorites and actions.
+- UI-only state (e.g. comparison modal open) stays local in **`WeatherApp`**.
 
-- Weather data, loading, error
-- UI preferences (theme, unit)
-- Favorites
+### 2. Custom hooks ✅
+- **`useWeather`** — search + store-backed data/errors/loading
+- **`useGeolocation`**, **`useTheme`**, **`useFavorites`** — `src/hooks/`
 
-Benefits: less prop drilling, clearer separation of concerns, easier testing.
+### 3. Error boundaries ✅
+- **`ErrorBoundary`** wraps forecast content in **`WeatherApp`** (isolated failures below search).
+- **Root `ErrorBoundary`** in **`main.tsx`** wraps **`App`** with a full-screen fallback + reload so **`/`** and **`/app`** don’t white-screen on a crash.
 
-### 2. Custom Hooks ✅
-Extract logic into hooks:
-
-- `useWeather(city)` – fetch, cache, loading, error
-- `useGeolocation()` – location + permission handling
-- `useTheme()` – dark/light + persistence
-- `useFavorites()` – add/remove + persistence
-
-### 3. Error Boundaries ✅
-Add an error boundary around the main content so a single component crash doesn’t break the whole app.
-
-### 4. API Layer ✅
-- Add retries (e.g. 2 retries with backoff)
-- Centralize error handling and user-facing messages
-- Consider React Query / TanStack Query for caching, refetching, and loading states
+### 4. API layer ✅
+- **Retries:** Visual Crossing path uses bounded retries + backoff in **`weatherService.ts`**.
+- **Centralized copy:** **`src/services/weatherApiErrors.ts`** — HTTP messages for Visual Crossing, shared **`CITY_NOT_FOUND`**, Open-Meteo unavailable / invalid payload strings; **`openMeteoService`** and **`weatherService`** import from here; **`WeatherComparison`** uses **`CITY_NOT_FOUND`** for failed lookups.
+- **TanStack Query:** **not added** — would duplicate Zustand-driven fetch flow; optional future refactor if you want background refetch / deduping at the HTTP layer.
 
 ---
 
