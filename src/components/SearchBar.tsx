@@ -6,6 +6,7 @@ import { debounce } from '../utils/helpers';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { DEFAULT_CITY_DISPLAY } from '@/constants/defaults';
 
 interface Props {
   onSearch: (city: string) => void;
@@ -125,9 +126,13 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
             aria-hidden
           />
           <Input
+            id="weather-search"
+            name="weather-search"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setShowSuggestions(true)}
+            autoComplete="off"
+            aria-label={`Search for a city or place. Suggested: ${DEFAULT_CITY_DISPLAY}.`}
             placeholder="Search city or place..."
             className={cn(
               'w-full border-white/20 bg-white/5 pr-4 text-white shadow-lg shadow-black/20 placeholder:text-white/40',
@@ -146,6 +151,7 @@ const SearchBar = ({ onSearch, onLocationFetch, defaultValue, centered = false }
           size={centered ? 'icon-lg' : 'icon'}
           onClick={onLocationFetch}
           title="Use my location"
+          aria-label="Use my current location for weather"
           className={cn(
             'shrink-0 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white',
             centered && 'size-14 rounded-2xl'

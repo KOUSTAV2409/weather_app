@@ -37,6 +37,7 @@ interface WeatherState {
 }
 
 export const useWeatherStore = create<WeatherState>((set, get) => ({
+  /** Empty until the user searches (`DEFAULT_CITY_DISPLAY` in `constants/defaults.ts` is the canonical label, not an auto-fetch). */
   city: '',
   weatherData: null,
   hourlyData: [],
