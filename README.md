@@ -1,6 +1,6 @@
 # Our Weather
 
-A React weather app with forecasts, maps, and a small analytics dashboard. **Live:** [kyweather.vercel.app](https://kyweather.vercel.app/)
+A React weather app with forecasts, maps, and a small analytics dashboard. **Live:** [kyweather.vercel.app](https://kyweather.vercel.app/) — **Docs:** [kyweather.vercel.app/docs](https://kyweather.vercel.app/docs) (same route locally: `/docs`).
 
 ## Stack
 

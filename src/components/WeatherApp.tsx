@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Moon, Sun, GitCompare, Github, Home, RefreshCw } from 'lucide-react';
+import { Moon, Sun, GitCompare, Github, Home, RefreshCw, BookOpen } from 'lucide-react';
 import { useWeather, useGeolocation, useTheme, useFavorites } from '../hooks';
 import { useWeatherStore } from '../store/weatherStore';
 import WeatherCard from './WeatherCard';
@@ -116,6 +116,14 @@ const WeatherApp = () => {
                 aria-label="Back to home"
               >
                 <Home size={18} className="text-white" aria-hidden />
+              </Link>
+              <Link
+                to="/docs"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 p-2 transition-colors hover:border-white"
+                title="Documentation"
+                aria-label="Documentation"
+              >
+                <BookOpen size={18} className="text-white" aria-hidden />
               </Link>
               <a
                 href="https://github.com/KOUSTAV2409/weather_app"
