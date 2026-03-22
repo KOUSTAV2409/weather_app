@@ -2,7 +2,7 @@
 .env
 .env.*
 
-# Non-essential docs (keep README.md)
+# Markdown: only README.md is tracked; local notes (*.md) stay untracked / unstaged from index
 *.md
 !README.md
 
