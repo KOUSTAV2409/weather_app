@@ -1,6 +1,10 @@
 import { WeatherData, HourlyWeather, DailyForecast } from '../types/weather';
 import { fetchOpenMeteoWeather } from './openMeteoService';
 import { geocodeToCoords } from './geocodingService';
+import {
+  CITY_NOT_FOUND,
+  visualCrossingHttpError,
+} from './weatherApiErrors';
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const BASE_URL =
@@ -27,15 +31,6 @@ const mapConditionToIcon = (cond: string): string => {
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const getUserFacingError = (status: number, cityName: string): string => {
-  if (status === 400) return 'Invalid location. Please check the city name.';
-  if (status === 401) return 'API key invalid. Please check configuration.';
-  if (status === 404) return 'City not found. Try a different location.';
-  if (status === 429) return 'Too many requests. Please try again later.';
-  if (status >= 500) return 'Weather service is temporarily unavailable.';
-  return `Unable to fetch weather for "${cityName}". Please try again.`;
-};
 
 const parseVisualCrossing = (data: unknown): {
   weatherData: WeatherData;
@@ -124,7 +119,7 @@ const tryVisualCrossing = async (cityName: string) => {
   const resp = await fetch(
     `${BASE_URL}/${encodeURIComponent(cityName)}?unitGroup=us&key=${API_KEY}&contentType=json`
   );
-  if (!resp.ok) throw new Error(getUserFacingError(resp.status, cityName));
+  if (!resp.ok) throw new Error(visualCrossingHttpError(resp.status, cityName));
   const data = await resp.json();
   return parseVisualCrossing(data);
 };
@@ -148,7 +143,7 @@ const tryOpenMeteo = async (cityName: string) => {
     displayName = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
   } else {
     const coords = await geocodeToCoords(cityName);
-    if (!coords) throw new Error('City not found');
+    if (!coords) throw new Error(CITY_NOT_FOUND);
     lat = coords.lat;
     lon = coords.lon;
     displayName = coords.displayName;
@@ -193,7 +188,7 @@ export const fetchWeatherData = async (cityName: string): Promise<WeatherResult>
     const result = await tryOpenMeteo(cityName);
     return result;
   } catch (err) {
-    throw lastError ?? (err instanceof Error ? err : new Error('City not found'));
+    throw lastError ?? (err instanceof Error ? err : new Error(CITY_NOT_FOUND));
   }
 };
 

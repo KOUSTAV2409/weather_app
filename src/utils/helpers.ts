@@ -101,3 +101,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
+/** Glass-style panel: backdrop blur + translucent surface (UX glassmorphism) */
+export const glassPanel =
+  'backdrop-blur-xl bg-card/45 border border-white/15 shadow-lg ring-1 ring-white/5 dark:bg-card/35 dark:border-white/10';

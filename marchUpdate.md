@@ -3,13 +3,33 @@
 
 # Weather App – Analysis & Next-Level Recommendations
 
+## Quick action plan
+
+Prioritized for **impact vs effort**. Check items off as you ship.
+
+| Priority | Action | Notes |
+|----------|--------|--------|
+| **P0** | Wire **`feelsLikeInsights`** into `WeatherCard` (or delete the util) | Doc debt; users see “why it feels different” |
+| **P0** | **Dependencies:** remove unused **`axios`**, or switch fetches to it; **integrate or remove** `@vercel/analytics` & `@vercel/speed-insights` | Smaller install, clearer intent |
+| **P1** | **A11y pass:** `aria-live` for errors/updates; **`aria-label`** on icon-only controls (header, search location); verify **Dialog** focus/escape | Matches roadmap Phase 3 |
+| **P1** | **Loading:** skeleton or placeholder for **map** while MapLibre style loads | UX polish |
+| **P2** | Replace global **`*` { transition }** in CSS with **targeted** rules | Performance / fewer odd animations |
+| **P2** | Audit **list keys** (`key={i}` → stable ids where possible) | Fewer reconciliation bugs |
+| **P3** | **PWA:** manifest + service worker + offline cache for last forecast | “App-like” install |
+| **P3** | **Shareable card** (image or OG link) | Build in public / social |
+| **P4** | **TanStack Query** for weather fetches (optional) | Refetch, cache policies; bigger refactor |
+
+**Already shipped (don’t re-do):** Zustand + hooks, error boundary, API retries, **Open‑Meteo fallback**, weather **gradients**, **Geist** font, **shadcn** UI, **mapcn/MapLibre** map, compare **Dialog**, **dashboard** (charts + tables).
+
+---
+
 ## Current State Summary
 
 ### Tech Stack
 - **React 19** + **TypeScript 5.7** + **Vite 6**
-- **Tailwind CSS 4** + custom CSS variables (Vercel-inspired)
-- **Leaflet** for maps, **Lucide React** for icons
-- **Visual Crossing API** for weather data
+- **Tailwind CSS 4** + **shadcn/ui** (Radix Nova) + **Geist** variable font
+- **MapLibre** via **mapcn** (not Leaflet), **Lucide** icons, **Recharts** (dashboard)
+- **Visual Crossing** when `VITE_WEATHER_API_KEY` is set; **Open‑Meteo** + geocoding fallback (no key required)
 
 ### Strengths
 - Modern stack (React 19, Vite 6, Tailwind 4)
@@ -20,92 +40,80 @@
 
 ---
 
-## Critical Fixes (Do First) ✅
+## Critical Fixes — **DONE** ✅
 
-### 1. SearchBar Input Bug ✅
-`SearchBar` uses `defaultValue` but updates `input` state. The input is effectively uncontrolled and can desync:
+All items below are implemented and verified in code. This section is closed.
 
-```66:67:src/components/SearchBar.tsx
-            defaultValue={input}
-            onChange={(e) => handleInputChange(e.target.value)}
-```
+### 1. SearchBar controlled input ✅
+- **Implementation:** `SearchBar` uses shadcn **`Input`** with **`value={input}`** and **`onChange`**. Parent **`defaultValue`** syncs via **`useEffect`** when the resolved city changes; coordinate strings (`lat,lon`) intentionally keep the typed display.
+- **Extras (shadcn/a11y):** `id` / `name`, **`autoComplete="off"`**, **`aria-label`** (includes suggested city from `DEFAULT_CITY_DISPLAY`), location **`Button`** has **`aria-label`**.
+- **Reference:** `src/components/SearchBar.tsx`
 
-**Fix:** Use `value={input}` and `onChange` so it’s controlled. Sync with `defaultValue` when the parent changes city (e.g. geolocation).
+### 2. Default city typo / canonical label ✅
+- **Implementation:** Legacy **`baikola`** removed. Canonical suggested city is **`DEFAULT_CITY_DISPLAY`** (`'New York'`) in **`src/constants/defaults.ts`**. Store **`city`** stays **`''`** until the user searches (no surprise auto-fetch).
+- **Reference:** `src/constants/defaults.ts`, `src/store/weatherStore.ts`
 
-### 2. Default City Typo ✅
-Initial city is `'baikola'` (likely meant “Baikul” or similar). Use a sensible default like `'New York'` or `'London'`.
+### 3. Folder casing ✅
+- **Implementation:** All UI lives under **`src/components/`** (e.g. **`WeatherApp.tsx`**). No duplicate **`Components/`** path.
 
-### 3. Folder Casing ✅
-`components/` vs `Components/` is inconsistent. Standardize on `components/` and move `WeatherApp.tsx` there.
-
-### 4. Theme Not Persisted ✅
-`darkMode` resets on reload. Persist it in `localStorage` (similar to unit and favorites).
+### 4. Theme persistence ✅
+- **Implementation:** **`darkMode`** is loaded and saved with **`getDarkMode` / `setDarkMode`** in **`src/utils/storage.ts`** and wired through Zustand **`setDarkMode`**.
 
 ---
 
-## Architecture Improvements ✅
+## Architecture Improvements — **DONE** ✅
 
-### 1. State Management ✅
-All state lives in `WeatherApp.tsx` (~30 lines of state). As features grow, this will become hard to maintain.
+This section is closed. Summary of what’s in the codebase:
 
-**Recommendation:** Introduce a small store (e.g. **Zustand**):
+### 1. State management (Zustand) ✅
+- **`src/store/weatherStore.ts`** — weather payload, loading, error, city, **`darkMode`**, unit, favorites and actions.
+- UI-only state (e.g. comparison modal open) stays local in **`WeatherApp`**.
 
-- Weather data, loading, error
-- UI preferences (theme, unit)
-- Favorites
+### 2. Custom hooks ✅
+- **`useWeather`** — search + store-backed data/errors/loading
+- **`useGeolocation`**, **`useTheme`**, **`useFavorites`** — `src/hooks/`
 
-Benefits: less prop drilling, clearer separation of concerns, easier testing.
+### 3. Error boundaries ✅
+- **`ErrorBoundary`** wraps forecast content in **`WeatherApp`** (isolated failures below search).
+- **Root `ErrorBoundary`** in **`main.tsx`** wraps **`App`** with a full-screen fallback + reload so **`/`** and **`/app`** don’t white-screen on a crash.
 
-### 2. Custom Hooks ✅
-Extract logic into hooks:
-
-- `useWeather(city)` – fetch, cache, loading, error
-- `useGeolocation()` – location + permission handling
-- `useTheme()` – dark/light + persistence
-- `useFavorites()` – add/remove + persistence
-
-### 3. Error Boundaries ✅
-Add an error boundary around the main content so a single component crash doesn’t break the whole app.
-
-### 4. API Layer ✅
-- Add retries (e.g. 2 retries with backoff)
-- Centralize error handling and user-facing messages
-- Consider React Query / TanStack Query for caching, refetching, and loading states
+### 4. API layer ✅
+- **Retries:** Visual Crossing path uses bounded retries + backoff in **`weatherService.ts`**.
+- **Centralized copy:** **`src/services/weatherApiErrors.ts`** — HTTP messages for Visual Crossing, shared **`CITY_NOT_FOUND`**, Open-Meteo unavailable / invalid payload strings; **`openMeteoService`** and **`weatherService`** import from here; **`WeatherComparison`** uses **`CITY_NOT_FOUND`** for failed lookups.
+- **TanStack Query:** **not added** — would duplicate Zustand-driven fetch flow; optional future refactor if you want background refetch / deduping at the HTTP layer.
 
 ---
 
-## UX/UI Enhancements
+## UX/UI Enhancements — **DONE** ✅
 
-### 1. Theming & Visual Identity ✅ (Weather gradients)
-- **Current:** Light/dark with Vercel-style variables.
-- **Done:**
-  - ✅ **Weather-based gradient backgrounds** – Background changes with conditions (sunny → warm amber/orange, rainy → cool blue, stormy → dark purple, cloudy → blue-gray, snowy → cool blue-white, fog → muted gray)
-- **Remaining:**
-  - Use **Geist** or a similar font for a more distinct look
-  - Optional **glassmorphism** for cards (backdrop-blur, subtle borders)
+This section is closed. Implemented behavior:
 
-### 2. Responsive Design
-- Layout is generally responsive, but:
-  - WeatherCard grid (4 columns) may be cramped on small screens → use 2 columns on mobile
-  - Hourly forecast scroll could show “current hour” first
-  - Add touch-friendly tap targets (min 44px)
+### 1. Theming & visual identity ✅
+- **Weather-based gradient backgrounds** (unchanged).
+- **Geist** font (unchanged).
+- **Glass-style panels:** shared **`glassPanel`** helper in **`src/utils/helpers.ts`** — applied to **`WeatherCard`**, **`HourlyForecast`**, **`DailyForecast`**; map container uses matching **backdrop-blur** + translucent border.
 
-### 3. Loading & Skeleton
-- LoadingSkeleton exists; ensure it matches the final layout
-- Add **skeleton for the map** while it loads
-- Consider **optimistic UI** for favorites (update UI before API/localStorage)
+### 2. Responsive design ✅
+- **WeatherCard** metrics use **`grid-cols-2` / `sm:grid-cols-4`** (already mobile-friendly).
+- **Hourly strip:** **`orderHourlyFromCurrentHour`** in **`src/utils/hourlyOrder.ts`** rotates slots so the **current local hour** (using API **IANA timezone**) is **first**; horizontal scroll resets to start.
+- **Touch targets:** header controls use at least **`min-h-11 min-w-11`** (44px) where appropriate; map zoom controls already sized similarly.
 
-### 4. Accessibility
-- Add `aria-live` for dynamic content (weather updates, errors)
-- Ensure focus management in modals (trap focus, close on Escape)
-- Add `aria-label` for icon-only buttons (theme, unit, location)
-- Check contrast for text and icons
+### 3. Loading & skeleton ✅
+- **`LoadingSkeleton`** layout aligned with the card grid (**2 / 4 columns**, semantic **border-border**).
+- **Map:** **`onMapReady`** callback on **`Map`** (`map.tsx`) + **`Skeleton`** overlay in **`WeatherMap.tsx`** until the map loads.
+- **Favorites:** Zustand updates the **favorites array first**, then **`localStorage`** (**optimistic** UI).
 
-### 5. Micro-interactions
-- **Pull-to-refresh** on mobile
-- **Haptic feedback** where supported
-- **Staggered fade-in** for cards
-- **Smooth scroll** to sections when navigating
+### 4. Accessibility ✅
+- **`role="alert"`** + **`aria-live="assertive"`** on the error banner.
+- **`aria-live="polite"`** + **`sr-only`** summary when forecast loads (location + condition).
+- **Icon-only / compact controls:** **`aria-label`** on home, GitHub, refresh, compare, unit, theme; search location was already labeled in **`SearchBar`**.
+- **Compare dialog:** Radix **`Dialog`** provides **focus trap** and **Escape** to close (shadcn default).
+
+### 5. Micro-interactions ✅
+- **Refresh:** toolbar **Refresh** button refetches (practical alternative to **pull-to-refresh**; no gesture hook).
+- **Haptics:** **`navigator.vibrate(12)`** on **favorite** toggle when supported.
+- **Staggered fade-in:** **`.weather-stagger`** on the forecast stack + CSS nth-child delays; **`prefers-reduced-motion`** disables animation.
+- **Smooth scroll:** **`html { scroll-behavior: smooth }`** with **`prefers-reduced-motion`** override.
 
 ---
 
@@ -196,23 +204,16 @@ Add an error boundary around the main content so a single component crash doesn�
 | Mar 2025 | Landing page, features grid, video placeholder, footer branding | — |
 | Mar 2025 | **Weather-based gradient backgrounds** | "The app now changes color based on the weather. Sunny = warm, rainy = blue." |
 | Mar 2025 | **Dual API with Open-Meteo fallback** | Visual Crossing first, Open-Meteo (no key) on failure. Works without API key. |
+| Mar 2025 | **shadcn/ui + mapcn (MapLibre) + forecast dashboard** | Buttons, inputs, cards, dialog, charts/tables; map replaces Leaflet |
 
-### Next Up (in order)
-1. Use `feelsLikeInsights` (quick win)
-2. PWA – add to home screen
-3. Shareable weather card
-4. Responsive fixes (WeatherCard 2 cols on mobile)
+### Next Up (aligned with Quick action plan)
+1. `feelsLikeInsights` + dependency cleanup (axios / Vercel packages)
+2. Accessibility + map loading state
+3. PWA, then shareable card
+4. Optional: TanStack Query, notifications, i18n (see Next-Level Features)
 
 ---
 
 ## Summary
 
-The app has a solid foundation and a strong feature set. The biggest impact will come from:
-
-1. Fixing the SearchBar bug and small UX issues
-2. Refactoring state and logic into hooks and a store
-3. Adding a more distinctive visual identity (weather-based themes, typography)
-4. Improving accessibility and mobile UX
-5. Adding PWA and notifications for a more “app-like” experience
-
-If you tell me which phase or area you want to tackle first (e.g. SearchBar fix, Zustand setup, or weather-based theming), I can walk through concrete code changes step by step.
+The app has a solid foundation: **centralized state (Zustand), hooks, dual weather APIs, shadcn design system, MapLibre map, and a forecast dashboard**. The highest‑leverage **next** steps are **using or removing dead code (`feelsLikeInsights`, unused deps), tightening accessibility, and shipping a PWA + share flow**—see **Quick action plan** above.

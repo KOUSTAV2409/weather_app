@@ -1,37 +1,37 @@
 const LoadingSkeleton = () => (
-  <div className="vercel-card rounded-2xl p-8">
-    <div className="flex justify-between items-start mb-12">
-      <div className="space-y-2">
-        <div className="w-48 h-6 shimmer rounded" />
-        <div className="w-32 h-4 shimmer rounded" />
+  <div className="vercel-card fade-in rounded-2xl p-8">
+    <div className="mb-12 flex items-start justify-between">
+      <div className="flex flex-col gap-2">
+        <div className="h-6 w-48 rounded shimmer" />
+        <div className="h-4 w-32 rounded shimmer" />
       </div>
-      <div className="w-8 h-8 shimmer rounded-lg" />
-    </div>
-    
-    <div className="flex items-end mb-12">
-      <div className="w-40 h-24 shimmer rounded" />
-      <div className="w-16 h-16 shimmer rounded-full ml-8" />
+      <div className="size-8 rounded-lg shimmer" />
     </div>
 
-    <div className="space-y-2 mb-8">
-      <div className="w-32 h-5 shimmer rounded" />
-      <div className="w-full h-4 shimmer rounded" />
+    <div className="mb-12 flex items-end">
+      <div className="h-24 w-40 rounded shimmer" />
+      <div className="ml-8 size-16 shrink-0 rounded-full shimmer" />
     </div>
 
-    <div className="grid grid-cols-4 gap-4 mb-6">
+    <div className="mb-8 flex flex-col gap-2">
+      <div className="h-5 w-32 rounded shimmer" />
+      <div className="h-4 w-full rounded shimmer" />
+    </div>
+
+    <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="space-y-2">
-          <div className="w-16 h-3 shimmer rounded" />
-          <div className="w-12 h-5 shimmer rounded" />
+        <div key={i} className="flex flex-col gap-2">
+          <div className="h-3 w-16 rounded shimmer" />
+          <div className="h-5 w-12 rounded shimmer" />
         </div>
       ))}
     </div>
 
-    <div className="grid grid-cols-4 gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
+    <div className="grid grid-cols-2 gap-4 border-t border-border pt-6 sm:grid-cols-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="space-y-2">
-          <div className="w-16 h-3 shimmer rounded" />
-          <div className="w-12 h-4 shimmer rounded" />
+        <div key={i} className="flex flex-col gap-2">
+          <div className="h-3 w-16 rounded shimmer" />
+          <div className="h-4 w-12 rounded shimmer" />
         </div>
       ))}
     </div>

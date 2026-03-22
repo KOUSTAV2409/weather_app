@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Moon, Sun, GitCompare, Github, Home } from 'lucide-react';
+import { Moon, Sun, GitCompare, Github, Home, RefreshCw } from 'lucide-react';
 import { useWeather, useGeolocation, useTheme, useFavorites } from '../hooks';
 import { useWeatherStore } from '../store/weatherStore';
 import WeatherCard from './WeatherCard';
@@ -22,7 +22,8 @@ import { getWeatherGradientStyle } from '../utils/helpers';
 const WeatherApp = () => {
   const [showComparison, setShowComparison] = useState(false);
 
-  const { weatherData, hourlyData, dailyData, loading, error, search } = useWeather();
+  const { weatherData, hourlyData, dailyData, loading, error, search, fetchWeather, city } =
+    useWeather();
   const { getLocation, error: locationError, isLocating, clearError } = useGeolocation();
   const { darkMode, toggleDarkMode } = useTheme();
   const unit = useWeatherStore((s) => s.unit);
@@ -107,45 +108,69 @@ const WeatherApp = () => {
             <h1 className="text-2xl md:text-3xl font-calligraphic text-white">
               Weather
             </h1>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Link
                 to="/"
-                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 p-2 transition-colors hover:border-white"
                 title="Back to home"
+                aria-label="Back to home"
               >
-                <Home size={18} className="text-white" />
+                <Home size={18} className="text-white" aria-hidden />
               </Link>
               <a
                 href="https://github.com/KOUSTAV2409/weather_app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 p-2 transition-colors hover:border-white"
                 title="View on GitHub"
+                aria-label="View project on GitHub"
               >
-                <Github size={18} className="text-white" />
+                <Github size={18} className="text-white" aria-hidden />
               </a>
               {hasWeather && (
                 <>
                   <button
-                    onClick={() => setShowComparison(true)}
-                    className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white flex items-center gap-2"
+                    type="button"
+                    onClick={() => {
+                      const q = weatherData?.resolvedAddress ?? city;
+                      if (q) void fetchWeather(q);
+                    }}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 p-2 text-white transition-colors hover:border-white"
+                    title="Refresh weather"
+                    aria-label="Refresh weather"
                   >
-                    <GitCompare size={16} />
+                    <RefreshCw size={18} className="text-white" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowComparison(true)}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm text-white transition-colors hover:border-white"
+                    aria-label="Compare cities"
+                  >
+                    <GitCompare size={16} aria-hidden />
                     Compare
                   </button>
                   <button
+                    type="button"
                     onClick={toggleUnit}
-                    className="px-3 py-2 text-sm border border-white/20 rounded-lg hover:border-white transition-colors text-white"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 px-3 py-2 text-sm text-white transition-colors hover:border-white"
+                    aria-label={`Temperature unit ${unit === 'C' ? 'Celsius' : 'Fahrenheit'}, click to switch`}
                   >
                     °{unit}
                   </button>
                 </>
               )}
               <button
+                type="button"
                 onClick={toggleDarkMode}
-                className="p-2 border border-white/20 rounded-lg hover:border-white transition-colors"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/20 p-2 transition-colors hover:border-white"
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                {darkMode ? <Sun size={18} className="text-white" /> : <Moon size={18} className="text-gray-900" />}
+                {darkMode ? (
+                  <Sun size={18} className="text-white" aria-hidden />
+                ) : (
+                  <Moon size={18} className="text-gray-900" aria-hidden />
+                )}
               </button>
             </div>
           </div>
@@ -177,7 +202,11 @@ const WeatherApp = () => {
 
           {/* Error */}
           {displayError && (
-            <div className="bg-red-950/50 border border-red-800 rounded-xl p-4 mb-6">
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="mb-6 rounded-xl border border-red-800 bg-red-950/50 p-4"
+            >
               <p className="text-sm text-red-400">{displayError}</p>
             </div>
           )}
@@ -188,36 +217,54 @@ const WeatherApp = () => {
           {/* Content */}
           <ErrorBoundary>
             {!loading && !isLocating && weatherData && (
-              <div className="space-y-4">
-                <WeatherCard
-                  data={weatherData}
-                  unit={unit}
-                  isFavorite={isFavorite(weatherData.resolvedAddress)}
-                  onToggleFavorite={() => toggleFavorite(weatherData.resolvedAddress)}
-                />
-
-                <WeatherMap
-                  lat={weatherData.latitude}
-                  lon={weatherData.longitude}
-                  city={weatherData.resolvedAddress}
-                  theme={darkMode ? 'dark' : 'light'}
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <BestTimeOfDay hourly={hourlyData} unit={unit} />
-                  <OutfitSuggestions data={weatherData} unit={unit} />
+              <>
+                <div
+                  className="sr-only"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  {`Weather loaded for ${weatherData.resolvedAddress}. ${weatherData.weatherCondition}.`}
                 </div>
+                <div className="weather-stagger flex flex-col gap-4">
+                  <WeatherCard
+                    data={weatherData}
+                    unit={unit}
+                    isFavorite={isFavorite(weatherData.resolvedAddress)}
+                    onToggleFavorite={() => {
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        navigator.vibrate(12);
+                      }
+                      toggleFavorite(weatherData.resolvedAddress);
+                    }}
+                  />
 
-                <HourlyForecast hourly={hourlyData} unit={unit} />
-                <DailyForecast forecast={dailyData} unit={unit} />
+                  <WeatherMap
+                    lat={weatherData.latitude}
+                    lon={weatherData.longitude}
+                    city={weatherData.resolvedAddress}
+                    theme={darkMode ? 'dark' : 'light'}
+                  />
 
-                <WeatherDashboard hourly={hourlyData} daily={dailyData} unit={unit} />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <BestTimeOfDay hourly={hourlyData} unit={unit} />
+                    <OutfitSuggestions data={weatherData} unit={unit} />
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <WeatherStreaks forecast={dailyData} />
-                  <WeatherQuiz forecast={dailyData} unit={unit} />
+                  <HourlyForecast
+                    hourly={hourlyData}
+                    unit={unit}
+                    timeZone={weatherData.timezone}
+                  />
+                  <DailyForecast forecast={dailyData} unit={unit} />
+
+                  <WeatherDashboard hourly={hourlyData} daily={dailyData} unit={unit} />
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <WeatherStreaks forecast={dailyData} />
+                    <WeatherQuiz forecast={dailyData} unit={unit} />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </ErrorBoundary>
         </div>
