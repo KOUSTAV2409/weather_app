@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Search,
   MapPin as MapIcon,
+  BookOpen,
 } from 'lucide-react';
 
 const VideoPlaceholder = () => (
@@ -125,15 +126,24 @@ const LandingPage = () => {
               Our Weather
             </span>
           </Link>
-          <a
-            href="https://github.com/KOUSTAV2409/weather_app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
-          >
-            <Github size={18} />
-            <span>GitHub</span>
-          </a>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <Link
+              to="/docs"
+              className="flex items-center gap-1.5 text-white/60 transition-colors hover:text-white"
+            >
+              <BookOpen size={18} />
+              Docs
+            </Link>
+            <a
+              href="https://github.com/KOUSTAV2409/weather_app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-white/60 transition-colors hover:text-white"
+            >
+              <Github size={18} />
+              <span>GitHub</span>
+            </a>
+          </div>
         </header>
 
         {/* Hero - two column: content left, demo video right */}
